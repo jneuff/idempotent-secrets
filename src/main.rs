@@ -12,6 +12,22 @@ mod test {
         api::{ObjectMeta, PostParams},
     };
 
+    async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
+        let namespaces: Api<Namespace> = Api::all(client.clone());
+        namespaces
+            .create(
+                &PostParams::default(),
+                &Namespace {
+                    metadata: ObjectMeta {
+                        name: Some(name.to_string()),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+            )
+            .await
+    }
+
     #[tokio::test]
     async fn should_create_kwok_cluster() {
         Command::new("kwokctl")
@@ -19,20 +35,7 @@ mod test {
             .output()
             .unwrap();
         let client = Client::try_default().await.unwrap();
-        let namespaces: Api<Namespace> = Api::all(client.clone());
-        namespaces
-            .create(
-                &PostParams::default(),
-                &Namespace {
-                    metadata: ObjectMeta {
-                        name: Some("new".to_string()),
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                },
-            )
-            .await
-            .unwrap();
+        create_namespace(&client, "new").await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, "new");
         let new_secret = Secret {
             metadata: ObjectMeta {
