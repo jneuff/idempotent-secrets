@@ -36,21 +36,24 @@ mod test {
         }
     }
 
-    async fn create_secret(namespace: &str, name: &str) {
+    async fn create_secret(namespace: &str, name: &str) -> Result<(), kube::Error> {
         let client = Client::try_default().await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, namespace);
         let new_secret = secret(name);
+        if secrets.get(name).await.is_ok() {
+            return Ok(());
+        }
         secrets
             .create(&PostParams::default(), &new_secret)
             .await
-            .unwrap();
+            .map(|_| ())
     }
 
     #[tokio::test]
     async fn should_create_secret() {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "create").await.unwrap();
-        create_secret("create", "create-secret").await;
+        create_secret("create", "create-secret").await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, "create");
         let actual_secret = secrets.get("create-secret").await.unwrap();
         assert_eq!(
@@ -60,11 +63,10 @@ mod test {
     }
 
     #[tokio::test]
-    #[should_panic]
     async fn should_not_create_secret_if_exists() {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "idempotent").await.unwrap();
-        create_secret("idempotent", "idempotent-secret").await;
-        create_secret("idempotent", "idempotent-secret").await;
+        create_secret("idempotent", "idempotent-secret").await.unwrap();
+        create_secret("idempotent", "idempotent-secret").await.unwrap();
     }
 }
