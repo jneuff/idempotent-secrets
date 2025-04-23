@@ -58,4 +58,13 @@ mod test {
             Some("create-secret".to_string())
         );
     }
+
+    #[tokio::test]
+    #[should_panic]
+    async fn should_not_create_secret_if_exists() {
+        let client = Client::try_default().await.unwrap();
+        create_namespace(&client, "idempotent").await.unwrap();
+        create_secret("idempotent", "idempotent-secret").await;
+        create_secret("idempotent", "idempotent-secret").await;
+    }
 }
