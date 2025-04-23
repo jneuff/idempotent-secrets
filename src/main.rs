@@ -38,6 +38,16 @@ mod test {
         }
     }
 
+    async fn create_secret(namespace: &str, name: &str) {
+        let client = Client::try_default().await.unwrap();
+        let secrets: Api<Secret> = Api::namespaced(client, namespace);
+        let new_secret = secret(name);
+        secrets
+            .create(&PostParams::default(), &new_secret)
+            .await
+            .unwrap();
+    }
+
     #[tokio::test]
     async fn should_create_secret() {
         Command::new("kwokctl")
@@ -46,12 +56,8 @@ mod test {
             .unwrap();
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "new").await.unwrap();
+        create_secret("new", "new-secret").await;
         let secrets: Api<Secret> = Api::namespaced(client, "new");
-        let new_secret = secret("new-secret");
-        secrets
-            .create(&PostParams::default(), &new_secret)
-            .await
-            .unwrap();
         let actual_secret = secrets.get("new-secret").await.unwrap();
         assert_eq!(actual_secret.metadata.name, Some("new-secret".to_string()));
         Command::new("kwokctl")
