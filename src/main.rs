@@ -39,7 +39,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn should_create_kwok_cluster() {
+    async fn should_create_secret() {
         Command::new("kwokctl")
             .args(["create", "cluster", "--name", "should_create_kwok_cluster"])
             .output()
