@@ -4,8 +4,6 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-    use std::process::Command;
-
     use k8s_openapi::api::core::v1::{Namespace, Secret};
     use kube::{
         Api, Client,
@@ -50,19 +48,14 @@ mod test {
 
     #[tokio::test]
     async fn should_create_secret() {
-        Command::new("kwokctl")
-            .args(["create", "cluster", "--name", "should_create_kwok_cluster"])
-            .output()
-            .unwrap();
         let client = Client::try_default().await.unwrap();
-        create_namespace(&client, "new").await.unwrap();
-        create_secret("new", "new-secret").await;
-        let secrets: Api<Secret> = Api::namespaced(client, "new");
-        let actual_secret = secrets.get("new-secret").await.unwrap();
-        assert_eq!(actual_secret.metadata.name, Some("new-secret".to_string()));
-        Command::new("kwokctl")
-            .args(["delete", "cluster", "--name", "should_create_kwok_cluster"])
-            .output()
-            .unwrap();
+        create_namespace(&client, "create").await.unwrap();
+        create_secret("create", "create-secret").await;
+        let secrets: Api<Secret> = Api::namespaced(client, "create");
+        let actual_secret = secrets.get("create-secret").await.unwrap();
+        assert_eq!(
+            actual_secret.metadata.name,
+            Some("create-secret".to_string())
+        );
     }
 }

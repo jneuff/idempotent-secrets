@@ -69,5 +69,7 @@ jobs:
           command: kwokctl
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+      - name: Create cluster
+        run: kwokctl create cluster --name test-cluster --wait 60s
       - name: Run tests
         run: cargo test --verbose
