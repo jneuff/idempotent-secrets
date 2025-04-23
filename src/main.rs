@@ -28,6 +28,16 @@ mod test {
             .await
     }
 
+    fn secret(name: &str) -> Secret {
+        Secret {
+            metadata: ObjectMeta {
+                name: Some(name.to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
     #[tokio::test]
     async fn should_create_kwok_cluster() {
         Command::new("kwokctl")
@@ -37,13 +47,7 @@ mod test {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "new").await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, "new");
-        let new_secret = Secret {
-            metadata: ObjectMeta {
-                name: Some("new-secret".to_string()),
-                ..Default::default()
-            },
-            ..Default::default()
-        };
+        let new_secret = secret("new-secret");
         secrets
             .create(&PostParams::default(), &new_secret)
             .await
