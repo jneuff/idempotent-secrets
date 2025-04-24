@@ -4,7 +4,9 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-    use k8s_openapi::api::core::v1::{Namespace, Secret};
+    use std::collections::BTreeMap;
+
+    use k8s_openapi::{api::core::v1::{Namespace, Secret}, ByteString};
     use kube::{
         Api, Client,
         api::{ObjectMeta, PostParams},
@@ -26,20 +28,21 @@ mod test {
             .await
     }
 
-    fn secret(name: &str) -> Secret {
+    fn secret(name: &str, data: Option<BTreeMap<String, ByteString>>) -> Secret {
         Secret {
             metadata: ObjectMeta {
                 name: Some(name.to_string()),
                 ..Default::default()
             },
+            data,
             ..Default::default()
         }
     }
 
-    async fn create_secret(namespace: &str, name: &str) -> Result<(), kube::Error> {
+    async fn create_secret(namespace: &str, name: &str, data: Option<BTreeMap<String, ByteString>>) -> Result<(), kube::Error> {
         let client = Client::try_default().await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, namespace);
-        let new_secret = secret(name);
+        let new_secret = secret(name, data);
         if secrets.get(name).await.is_ok() {
             return Ok(());
         }
@@ -53,20 +56,22 @@ mod test {
     async fn should_create_secret() {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "create").await.unwrap();
-        create_secret("create", "create-secret").await.unwrap();
+        let data = BTreeMap::from([("foo".to_string(), ByteString("bar".into()))]);
+        create_secret("create", "create-secret", Some(data.clone())).await.unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, "create");
         let actual_secret = secrets.get("create-secret").await.unwrap();
         assert_eq!(
             actual_secret.metadata.name,
             Some("create-secret".to_string())
         );
+        assert_eq!(actual_secret.data.unwrap(), data);
     }
 
     #[tokio::test]
     async fn should_not_create_secret_if_exists() {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "idempotent").await.unwrap();
-        create_secret("idempotent", "idempotent-secret").await.unwrap();
-        create_secret("idempotent", "idempotent-secret").await.unwrap();
+        create_secret("idempotent", "idempotent-secret", None).await.unwrap();
+        create_secret("idempotent", "idempotent-secret", None).await.unwrap();
     }
 }
