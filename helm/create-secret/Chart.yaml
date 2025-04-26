@@ -1,0 +1,6 @@
+apiVersion: v2
+name: create-secret
+description: Create a secret
+type: application
+
+version: 0.1.0
