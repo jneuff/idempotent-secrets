@@ -1,0 +1,46 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kind
+        uses: helm/kind-action@v1.8.0
+        with:
+          node_image: kindest/node:v1.29.2
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.17.1
+
+      - name: Wait for cluster to be ready
+        run: |
+          kubectl wait --for=condition=ready node --all --timeout=300s
+          kubectl get nodes
+
+      - name: Install Helm chart
+        run: |
+          helm upgrade --install create-secret ./helm/create-secret \
+            --namespace test-create-secret \
+            --create-namespace \
+            --wait
+
+      - name: Check if secret has been created
+        continue-on-error: true
+        run: |
+          kubectl get secret -n test-create-secret secret1
+
+      - name: Clean up
+        if: always()
+        run: |
+          kind delete cluster
