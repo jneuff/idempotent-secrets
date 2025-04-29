@@ -148,7 +148,6 @@ jobs:
             --wait-for-jobs
 
       - name: Check if secret has been created
-        continue-on-error: true
         run: |
           kubectl get secret -n test-create-secret secret1
 

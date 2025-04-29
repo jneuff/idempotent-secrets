@@ -10,3 +10,4 @@ spec:
           image: create-secret:latest
           imagePullPolicy: IfNotPresent
       restartPolicy: Never
+      serviceAccountName: create-secret
