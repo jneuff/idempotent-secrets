@@ -1,24 +1,28 @@
+use rsa::{
+    RsaPrivateKey, RsaPublicKey,
+    pkcs1::{EncodeRsaPrivateKey, EncodeRsaPublicKey},
+    pkcs8::LineEnding,
+};
+
+fn generate_keypair() -> Result<(RsaPrivateKey, RsaPublicKey), rsa::Error> {
+    let mut rng = rand::thread_rng();
+    let priv_key = RsaPrivateKey::new(&mut rng, 4096)?;
+    let pub_key = RsaPublicKey::from(&priv_key);
+    Ok((priv_key, pub_key))
+}
+
+pub fn generate_keypair_pem() -> Result<(String, String), rsa::Error> {
+    let (priv_key, pub_key) = generate_keypair()?;
+    let priv_pem = priv_key.to_pkcs1_pem(LineEnding::LF)?;
+    let pub_pem = pub_key.to_pkcs1_pem(LineEnding::LF)?;
+    // TODO: Use dedicated type for keypair to prevent confusing private an public key
+    Ok((priv_pem.to_string(), pub_pem.to_string()))
+}
+
 #[cfg(test)]
 mod tests {
-    use rsa::{
-        Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey,
-        pkcs1::{EncodeRsaPrivateKey, EncodeRsaPublicKey},
-        pkcs8::LineEnding,
-    };
-
-    fn generate_keypair() -> Result<(RsaPrivateKey, RsaPublicKey), rsa::Error> {
-        let mut rng = rand::thread_rng();
-        let priv_key = RsaPrivateKey::new(&mut rng, 4096)?;
-        let pub_key = RsaPublicKey::from(&priv_key);
-        Ok((priv_key, pub_key))
-    }
-
-    fn generate_keypair_pem() -> Result<(String, String), rsa::Error> {
-        let (priv_key, pub_key) = generate_keypair()?;
-        let priv_pem = priv_key.to_pkcs1_pem(LineEnding::LF)?;
-        let pub_pem = pub_key.to_pkcs1_pem(LineEnding::LF)?;
-        Ok((priv_pem.to_string(), pub_pem.to_string()))
-    }
+    use super::*;
+    use rsa::Pkcs1v15Encrypt;
 
     #[test]
     fn should_generate_keypair() {
