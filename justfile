@@ -25,7 +25,9 @@ install-helm-chart:
     helm upgrade --install create-secret ./helm/create-secret \
     --namespace test-create-secret \
     --create-namespace \
-    --wait
+    --wait \
+    --wait-for-jobs \
+    --timeout 1m
 
 # Verify secret creation
 verify-secret:
