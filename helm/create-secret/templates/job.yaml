@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: create-secret
-          image: create-secret:latest
+          image: {{ include "create-secret.image" . }}
           imagePullPolicy: IfNotPresent
       restartPolicy: Never
       serviceAccountName: create-secret

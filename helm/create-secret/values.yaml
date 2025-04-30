@@ -1,0 +1,4 @@
+image:
+  registry: ghcr.io/jneuff
+  repository: create-secret
+  tag: latest
