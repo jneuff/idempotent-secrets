@@ -25,6 +25,7 @@ install-helm-chart:
     helm upgrade --install create-secret ./helm/create-secret \
     --namespace test-create-secret \
     --create-namespace \
+    --set image.registry="" \
     --wait \
     --wait-for-jobs \
     --timeout 1m
