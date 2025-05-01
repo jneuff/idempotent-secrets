@@ -74,7 +74,7 @@ jobs:
       - name: Create cluster
         run: kwokctl create cluster --name test-cluster --wait 60s
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --bins --verbose
 
   build-and-push:
     name: Build and Push Container
@@ -135,25 +135,7 @@ jobs:
         with:
           version: v3.17.1
 
-      - name: Wait for cluster to be ready
-        run: |
-          kubectl wait --for=condition=ready node --all --timeout=300s
-          kubectl get nodes
-
-      - name: Install Helm chart
-        run: |
-          helm upgrade --install create-secret ./helm/create-secret \
-            --namespace test-create-secret \
-            --create-namespace \
-            --wait \
-            --wait-for-jobs \
-            --timeout 1m
-
-      - name: Check if secret has been created
-        run: |
-          kubectl get secret -n test-create-secret secret1
-
-      - name: Clean up
-        if: always()
-        run: |
-          kind delete cluster
+      - name: Run integration tests
+        env:
+          GITHUB_CI: true
+        run: cargo test --test basic_test --verbose
