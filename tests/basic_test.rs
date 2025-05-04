@@ -118,8 +118,7 @@ fn test_namespace_creation() {
 
 #[test]
 fn test_helm_installation_and_secret_creation() {
-    // let namespace = given_a_namespace!();
-    let namespace = namespace("test-create-secret");
+    let namespace = given_a_namespace!();
 
     let mut args = vec![
         "upgrade",
@@ -131,7 +130,7 @@ fn test_helm_installation_and_secret_creation() {
         "--wait",
         "--wait-for-jobs",
         "--timeout",
-        "1m",
+        "30s",
     ];
     if std::env::var("GITHUB_CI").is_err() {
         args.extend(["--set", r#"image.registry="#]);

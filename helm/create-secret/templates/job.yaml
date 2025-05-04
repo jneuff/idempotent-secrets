@@ -3,11 +3,16 @@ kind: Job
 metadata:
   name: create-secret
 spec:
+  backoffLimit: 0
   template:
     spec:
       containers:
         - name: create-secret
           image: {{ include "create-secret.image" . }}
           imagePullPolicy: IfNotPresent
+          args:
+            - "create-secret"
+            - --namespace
+            - {{ .Release.Namespace }}
       restartPolicy: Never
       serviceAccountName: create-secret
