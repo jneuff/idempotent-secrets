@@ -7,7 +7,7 @@ struct Cluster {
 }
 
 impl Cluster {
-    fn new() -> Self {
+    fn ensure() -> Self {
         let name = "create-secret-test".to_string();
 
         // Check if cluster already exists
@@ -81,7 +81,7 @@ struct TestNamespace {
 }
 
 lazy_static! {
-    static ref CLUSTER: Arc<Cluster> = Arc::new(Cluster::new());
+    static ref CLUSTER: Arc<Cluster> = Arc::new(Cluster::ensure());
 }
 
 fn namespace(name: &str) -> TestNamespace {
