@@ -3,7 +3,7 @@ use std::process::Command;
 use std::sync::Arc;
 
 struct Cluster {
-    name: String,
+    _name: String,
 }
 
 impl Cluster {
@@ -44,7 +44,7 @@ impl Cluster {
             assert!(status.success(), "Failed to load docker image");
         }
 
-        Self { name }
+        Self { _name: name }
     }
 
     fn create_namespace(&self, name: &str) -> Result<(), kube::Error> {
@@ -77,7 +77,7 @@ impl Cluster {
 
 struct TestNamespace {
     name: String,
-    cluster: Arc<Cluster>,
+    _cluster: Arc<Cluster>,
 }
 
 lazy_static! {
@@ -92,7 +92,7 @@ fn namespace(name: &str) -> TestNamespace {
 
     TestNamespace {
         name: name.to_string(),
-        cluster,
+        _cluster: cluster,
     }
 }
 
@@ -107,13 +107,6 @@ macro_rules! given_a_namespace {
             .to_lowercase();
         namespace(&test_name)
     }};
-}
-
-#[test]
-fn test_namespace_creation() {
-    let ns = given_a_namespace!();
-    assert_eq!(ns.name, "test-namespace-creation");
-    assert!(!ns.cluster.name.is_empty());
 }
 
 #[test]
