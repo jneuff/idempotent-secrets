@@ -14,5 +14,6 @@ spec:
             - "create-secret"
             - --namespace
             - {{ .Release.Namespace }}
+            - {{ .Values.secretName }}
       restartPolicy: Never
       serviceAccountName: create-secret
