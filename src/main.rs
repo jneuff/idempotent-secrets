@@ -6,8 +6,10 @@ mod keypair;
 
 #[derive(Parser)]
 struct Args {
-    #[clap(long)]
+    #[clap(short, long)]
     namespace: String,
+
+    secret_name: String,
 }
 
 #[tokio::main]
@@ -25,7 +27,7 @@ async fn main() {
             k8s::ByteString(private_key.into_bytes()),
         ),
     ]);
-    k8s::create_secret(&args.namespace, "secret1", Some(data))
+    k8s::create_secret(&args.namespace, &args.secret_name, Some(data))
         .await
         .unwrap();
 }

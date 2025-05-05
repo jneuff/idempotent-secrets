@@ -112,6 +112,7 @@ macro_rules! given_a_namespace {
 #[test]
 fn test_helm_installation_and_secret_creation() {
     let namespace = given_a_namespace!();
+    let secret_name = "rsa-key";
 
     let mut args = vec![
         "upgrade",
@@ -120,6 +121,8 @@ fn test_helm_installation_and_secret_creation() {
         "./helm/create-secret",
         "--namespace",
         &namespace.name,
+        "--set",
+        r#"secretName="rsa-key""#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -138,14 +141,14 @@ fn test_helm_installation_and_secret_creation() {
 
     // Verify secret creation
     let output = Command::new("kubectl")
-        .args(["get", "secret", "secret1", "-n", &namespace.name])
+        .args(["get", "secret", secret_name, "-n", &namespace.name])
         .output()
         .expect("Failed to execute kubectl get secret command");
 
     assert!(output.status.success(), "Secret was not created");
     let output_str = String::from_utf8_lossy(&output.stdout);
     assert!(
-        output_str.contains("secret1"),
-        "Secret 'secret1' not found in output"
+        output_str.contains(secret_name),
+        "Secret '{secret_name}' not found in output"
     );
 }
