@@ -11,7 +11,7 @@ lazy_static = "1.4.0"
 rand = "0.8.5"
 rsa = "0.9.8"
 stdext = "0.3.3"
-tokio = { version = "1.44.2", features = ["macros", "rt-multi-thread", "test-util", "tokio-macros"] }
+tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread", "test-util", "tokio-macros"] }
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 3
