@@ -167,3 +167,47 @@ fn test_helm_installation_and_secret_creation() {
         "Secret '{secret_name}' not found in output"
     );
 }
+
+#[test]
+#[should_panic]
+fn should_adhere_to_pod_security_standards() {
+    let namespace = given_a_namespace!();
+    // label namespace with pod-security.kubernetes.io/enforce: privileged
+    let status = Command::new("kubectl")
+        .args([
+            "label",
+            "namespace",
+            &namespace.name,
+            "pod-security.kubernetes.io/enforce=restricted",
+        ])
+        .status()
+        .expect("Failed to execute kubectl label namespace command");
+
+    assert!(status.success(), "Failed to label namespace");
+
+    let mut args = vec![
+        "install",
+        "create-secret",
+        "./helm/create-secret",
+        "--namespace",
+        &namespace.name,
+        "--set",
+        r#"secretName="rsa-key""#,
+        "--set",
+        set_image_tag(),
+        "--wait",
+        "--wait-for-jobs",
+        "--timeout",
+        "30s",
+    ];
+    if std::env::var("GITHUB_CI").is_err() {
+        args.extend(["--set", r#"image.repository="#]);
+    }
+    // Install Helm chart
+    let status = Command::new("helm")
+        .args(args)
+        .status()
+        .expect("Failed to execute helm install command");
+
+    assert!(status.success(), "Failed to install Helm chart");
+}
