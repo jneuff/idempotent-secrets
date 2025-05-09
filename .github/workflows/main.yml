@@ -104,9 +104,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,format=short
+            type=sha,format=long
             type=ref,event=branch
-            latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -138,4 +137,5 @@ jobs:
       - name: Run integration tests
         env:
           GITHUB_CI: true
+          GITHUB_IMAGE_TAG: sha-${{ github.sha }}
         run: cargo test --test basic_test --verbose
