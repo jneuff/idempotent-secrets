@@ -1,6 +1,19 @@
+use const_format::formatc;
 use lazy_static::lazy_static;
 use std::process::Command;
 use std::sync::Arc;
+
+const fn image_tag() -> &'static str {
+    if let Some(sha) = option_env!("GITHUB_IMAGE_TAG") {
+        sha
+    } else {
+        "local"
+    }
+}
+
+const fn set_image_tag() -> &'static str {
+    formatc!(r#"image.tag={}"#, image_tag())
+}
 
 struct Cluster {
     _name: String,
@@ -35,7 +48,7 @@ impl Cluster {
                 .args([
                     "load",
                     "docker-image",
-                    "create-secret:latest",
+                    &format!("create-secret:{}", image_tag()),
                     "--name",
                     &name,
                 ])
@@ -123,6 +136,8 @@ fn test_helm_installation_and_secret_creation() {
         &namespace.name,
         "--set",
         r#"secretName="rsa-key""#,
+        "--set",
+        set_image_tag(),
         "--wait",
         "--wait-for-jobs",
         "--timeout",
