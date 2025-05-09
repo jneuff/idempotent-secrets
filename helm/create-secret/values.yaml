@@ -1,6 +1,6 @@
 image:
-  registry: ghcr.io/jneuff
-  repository: create-secret
+  repository: ghcr.io/jneuff
+  name: create-secret
   tag: latest
 
 secretName: secret-name

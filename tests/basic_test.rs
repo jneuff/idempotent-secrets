@@ -144,7 +144,7 @@ fn test_helm_installation_and_secret_creation() {
         "30s",
     ];
     if std::env::var("GITHUB_CI").is_err() {
-        args.extend(["--set", r#"image.registry="#]);
+        args.extend(["--set", r#"image.repository="#]);
     }
     // Install Helm chart
     let status = Command::new("helm")
