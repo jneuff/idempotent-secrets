@@ -5,14 +5,17 @@ edition = "2024"
 
 [dependencies]
 clap = { version = "4.5.37", features = ["derive"] }
-const_format = { version = "0.2.34", features = ["fmt"] }
 k8s-openapi = { version = "0.24.0", features = ["latest"] }
 kube = "0.99.0"
-lazy_static = "1.4.0"
 rand = "0.8.5"
 rsa = "0.9.8"
+tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread"] }
+
+[dev-dependencies]
+tokio = { version = "1.45.0", features = ["test-util", "tokio-macros"] }
+const_format = { version = "0.2.34", features = ["fmt"] }
+lazy_static = "1.4.0"
 stdext = "0.3.3"
-tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread", "test-util", "tokio-macros"] }
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 3
