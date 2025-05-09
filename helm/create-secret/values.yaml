@@ -3,4 +3,4 @@ image:
   name: create-secret
   tag: latest
 
-secretName: secret-name
+secretName:
