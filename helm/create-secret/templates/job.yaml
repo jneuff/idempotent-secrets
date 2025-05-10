@@ -15,5 +15,15 @@ spec:
             - --namespace
             - {{ .Release.Namespace }}
             - {{ .Values.secretName }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
       restartPolicy: Never
       serviceAccountName: create-secret
