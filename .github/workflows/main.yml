@@ -138,7 +138,7 @@ jobs:
         env:
           GITHUB_CI: true
           GITHUB_IMAGE_TAG: sha-${{ github.sha }}
-        run: cargo test --test basic_test --verbose
+        run: cargo test --test helm --verbose
 
   push-latest:
     name: Push Latest Tag
