@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-secret
+  name: {{ include "create-secret.fullname" . }}
 spec:
   backoffLimit: 0
   template:
@@ -26,4 +26,4 @@ spec:
             seccompProfile:
               type: RuntimeDefault
       restartPolicy: Never
-      serviceAccountName: create-secret
+      serviceAccountName: {{ include "create-secret.fullname" . }}
