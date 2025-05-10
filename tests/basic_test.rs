@@ -212,7 +212,7 @@ fn should_adhere_to_pod_security_standards() {
 }
 
 #[test]
-fn should_allow_installing_several_instances_in_the_same_namespace() {
+fn should_install_two_releases_with_different_names() {
     let namespace = given_a_namespace!();
 
     let mut args = vec![
@@ -265,5 +265,89 @@ fn should_allow_installing_several_instances_in_the_same_namespace() {
         .status()
         .expect("Failed to execute helm install command");
 
-    assert!(status.success(), "Failed to install Helm chart a second time");
+    assert!(
+        status.success(),
+        "Failed to install Helm chart a second time"
+    );
+}
+
+#[test]
+fn should_allow_fullname_override() {
+    let namespace = given_a_namespace!();
+
+    let mut args = vec![
+        "install",
+        "create-secret",
+        "./helm/create-secret",
+        "--namespace",
+        &namespace.name,
+        "--set",
+        r#"secretName="rsa-key""#,
+        "--set",
+        set_image_tag(),
+        "--set",
+        r#"fullnameOverride="custom-name""#,
+        "--wait",
+        "--wait-for-jobs",
+        "--timeout",
+        "30s",
+    ];
+    if std::env::var("GITHUB_CI").is_err() {
+        args.extend(["--set", r#"image.repository="#]);
+    }
+    // Install Helm chart
+    let status = Command::new("helm")
+        .args(args)
+        .status()
+        .expect("Failed to execute helm install command");
+
+    assert!(status.success(), "Failed to install Helm chart");
+
+    let output = Command::new("kubectl")
+        .args(["get", "pod", "-n", &namespace.name])
+        .output()
+        .expect("Failed to execute kubectl get pod command");
+
+    assert!(output.status.success(), "Failed to get pod");
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output_str.contains("custom-name"),
+        "Pod name does not contain custom-name"
+    );
+
+    let output = Command::new("kubectl")
+        .args(["get", "serviceaccount", "-n", &namespace.name])
+        .output()
+        .expect("Failed to execute kubectl get serviceaccount command");
+
+    assert!(output.status.success(), "Failed to get serviceaccount");
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output_str.contains("custom-name"),
+        "Serviceaccount name does not contain custom-name"
+    );
+
+    let output = Command::new("kubectl")
+        .args(["get", "role", "-n", &namespace.name])
+        .output()
+        .expect("Failed to execute kubectl get role command");
+
+    assert!(output.status.success(), "Failed to get role");
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output_str.contains("custom-name"),
+        "Role name does not contain custom-name"
+    );
+
+    let output = Command::new("kubectl")
+        .args(["get", "rolebinding", "-n", &namespace.name])
+        .output()
+        .expect("Failed to execute kubectl get rolebinding command");
+
+    assert!(output.status.success(), "Failed to get role");
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output_str.contains("custom-name"),
+        "Role name does not contain custom-name"
+    );
 }
