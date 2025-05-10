@@ -169,7 +169,6 @@ fn test_helm_installation_and_secret_creation() {
 }
 
 #[test]
-#[should_panic]
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
     // label namespace with pod-security.kubernetes.io/enforce: privileged
