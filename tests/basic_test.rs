@@ -212,7 +212,6 @@ fn should_adhere_to_pod_security_standards() {
 }
 
 #[test]
-#[should_panic]
 fn should_allow_installing_several_instances_in_the_same_namespace() {
     let namespace = given_a_namespace!();
 
