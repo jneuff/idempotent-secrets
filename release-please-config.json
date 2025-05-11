@@ -1,0 +1,16 @@
+{
+    "include-component-in-tag": true,
+    "tag-separator": "@",
+    "separate-pull-requests": true,
+    "always-update": true,
+    "packages": {
+        "./": {
+            "package-name": "image",
+            "release-type": "rust"
+        },
+        "./helm/create-secret": {
+            "package-name": "helm",
+            "release-type": "helm"
+        }
+    }
+}
