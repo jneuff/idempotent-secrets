@@ -8,3 +8,5 @@ updates:
     commit-message:
       prefix: "fix: "
       prefix-development: "" # Not yet supported for cargo, see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#prefix-development
+      prefix: "deps"
+      prefix-development: "chore" # Not yet supported for cargo, see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#prefix-development
