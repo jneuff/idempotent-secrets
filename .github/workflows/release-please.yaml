@@ -12,5 +12,6 @@ jobs:
       contents: write
       pull-requests: write
       repository-projects: write
+      issues: write
     steps:
       - uses: googleapis/release-please-action@v4
