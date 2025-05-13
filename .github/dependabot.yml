@@ -1,6 +1,10 @@
 version: 2
+
 updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: "build"
+      prefix-development: "" # Not yet supported for cargo, see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#prefix-development
