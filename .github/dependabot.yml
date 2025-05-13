@@ -6,5 +6,5 @@ updates:
     schedule:
       interval: "daily"
     commit-message:
-      prefix: "build"
+      prefix: "fix: "
       prefix-development: "" # Not yet supported for cargo, see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#prefix-development
