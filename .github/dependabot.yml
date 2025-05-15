@@ -8,3 +8,8 @@ updates:
     commit-message:
       prefix: "deps"
       prefix-development: "chore" # Not yet supported for cargo, see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#prefix-development
+    groups:
+      kube:
+        patterns:
+          - "kube"
+          - "k8s-openapi"
