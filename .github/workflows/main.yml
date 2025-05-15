@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+    tags:
+      - image-v*
   pull_request:
     branches: [main]
 
@@ -166,3 +168,28 @@ jobs:
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  push-semantic-version:
+    name: Push Semantic Version Tag
+    needs: integration-test
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'image-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and retag image with semantic version
+        run: |
+          tag=$(echo ${{ github.ref_name }} | sed 's/^image-v//')
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+
