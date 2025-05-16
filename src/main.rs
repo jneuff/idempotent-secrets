@@ -15,7 +15,6 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    println!("Hello, world!");
     let (private_key, public_key) = keypair::generate_keypair_pem().unwrap();
     let data = BTreeMap::from([
         (
