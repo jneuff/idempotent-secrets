@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/jneuff/create-secret/compare/image@v0.1.0...image@v0.1.1) (2025-05-16)
+
+
+### Bug Fixes
+
+* remove Hello, word! from output ([b330ef9](https://github.com/jneuff/create-secret/commit/b330ef95e516a957bcc9cae65109912018a15cb1))
+
 ## 0.1.0 (2025-05-15)
 
 
