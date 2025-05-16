@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags:
-      - image-v*
+      - image@v*
   pull_request:
     branches: [main]
 
@@ -172,7 +172,7 @@ jobs:
   push-semantic-version:
     name: Push Semantic Version Tag
     needs: integration-test
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'image-v')
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'image@v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -188,7 +188,7 @@ jobs:
 
       - name: Pull and retag image with semantic version
         run: |
-          tag=$(echo ${{ github.ref_name }} | sed 's/^image-v//')
+          tag=$(echo ${{ github.ref_name }} | sed 's/^image@v//')
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
