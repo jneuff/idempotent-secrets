@@ -132,7 +132,9 @@ jobs:
 
   integration-test-reusable:
     needs: build-and-push
-    uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
+    with:
+      image_tag: sha-${{ github.sha }}
+    uses: ./.github/workflows/integration_test_reusable.yaml
 
   push-latest:
     name: Push Latest Tag

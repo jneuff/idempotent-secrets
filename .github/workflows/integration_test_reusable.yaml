@@ -2,6 +2,12 @@ name: Integration Test
 
 on:
   workflow_call:
+    inputs:
+      image_tag:
+        description: "The image tag to use for the integration tests"
+        type: string
+        required: false
+        default: ""
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -28,5 +34,5 @@ jobs:
       - name: Run integration tests
         env:
           GITHUB_CI: true
-          GITHUB_IMAGE_TAG: sha-${{ github.sha }}
+          GITHUB_IMAGE_TAG: ${{ inputs.image_tag }}
         run: cargo test --test helm --verbose

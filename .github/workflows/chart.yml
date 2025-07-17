@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   integration-test-reusable:
-    uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
+    uses: ./.github/workflows/integration_test_reusable.yaml
 
   release-please:
     runs-on: ubuntu-latest
