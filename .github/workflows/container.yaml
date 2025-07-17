@@ -6,6 +6,7 @@ on:
     paths:
       - Containerfile
       - src/**
+      - tests/**
       - .github/workflows/container.yaml
       - .github/workflows/integration_test_reusable.yaml
   pull_request:
@@ -13,6 +14,7 @@ on:
     paths:
       - Containerfile
       - src/**
+      - tests/**
       - .github/workflows/container.yaml
       - .github/workflows/integration_test_reusable.yaml
 

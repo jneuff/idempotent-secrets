@@ -1,18 +1,26 @@
-use const_format::formatc;
 use lazy_static::lazy_static;
 use std::process::Command;
 use std::sync::Arc;
 
-const fn image_tag() -> &'static str {
-    if let Some(sha) = option_env!("GITHUB_IMAGE_TAG") {
-        if sha.is_empty() { "latest" } else { sha }
-    } else {
-        "local"
+fn image_tag_from_values() -> &'static str {
+    let values = include_str!("../helm/create-secret/values.yaml");
+    values
+        .lines()
+        .find(|line| line.contains("tag:"))
+        .and_then(|line| line.split("tag: ").last())
+        .expect("tag must be set")
+}
+
+fn image_tag() -> &'static str {
+    match option_env!("GITHUB_IMAGE_TAG") {
+        Some("") => image_tag_from_values(),
+        Some(sha) => sha,
+        None => "local",
     }
 }
 
-const fn set_image_tag() -> &'static str {
-    formatc!(r#"image.tag={}"#, image_tag())
+fn set_image_tag() -> String {
+    format!(r#"image.tag={}"#, image_tag())
 }
 
 struct Cluster {
@@ -126,6 +134,7 @@ macro_rules! given_a_namespace {
 fn test_helm_installation_and_secret_creation() {
     let namespace = given_a_namespace!();
     let secret_name = "rsa-key";
+    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "upgrade",
@@ -135,7 +144,7 @@ fn test_helm_installation_and_secret_creation() {
         "--namespace",
         &namespace.name,
         "--set",
-        set_image_tag(),
+        &set_image_tag,
         "--set",
         r#"secretName="rsa-key""#,
         "--wait",
@@ -171,6 +180,7 @@ fn test_helm_installation_and_secret_creation() {
 #[test]
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
+    let set_image_tag = set_image_tag();
     // label namespace with pod-security.kubernetes.io/enforce: privileged
     let status = Command::new("kubectl")
         .args([
@@ -191,7 +201,7 @@ fn should_adhere_to_pod_security_standards() {
         "--namespace",
         &namespace.name,
         "--set",
-        set_image_tag(),
+        &set_image_tag,
         "--set",
         r#"secretName="rsa-key""#,
         "--wait",
@@ -214,6 +224,7 @@ fn should_adhere_to_pod_security_standards() {
 #[test]
 fn should_install_two_releases_with_different_names() {
     let namespace = given_a_namespace!();
+    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "install",
@@ -222,7 +233,7 @@ fn should_install_two_releases_with_different_names() {
         "--namespace",
         &namespace.name,
         "--set",
-        set_image_tag(),
+        &set_image_tag,
         "--set",
         r#"secretName="rsa-key""#,
         "--wait",
@@ -248,7 +259,7 @@ fn should_install_two_releases_with_different_names() {
         "--namespace",
         &namespace.name,
         "--set",
-        set_image_tag(),
+        &set_image_tag,
         "--set",
         r#"secretName="rsa-key-2""#,
         "--wait",
@@ -274,6 +285,7 @@ fn should_install_two_releases_with_different_names() {
 #[test]
 fn should_allow_fullname_override() {
     let namespace = given_a_namespace!();
+    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "install",
@@ -282,7 +294,7 @@ fn should_allow_fullname_override() {
         "--namespace",
         &namespace.name,
         "--set",
-        set_image_tag(),
+        &set_image_tag,
         "--set",
         r#"secretName="rsa-key""#,
         "--set",
