@@ -3,6 +3,10 @@ name: Integration Test
 on:
   workflow_call:
 
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   integration-test:
     name: Integration Tests
