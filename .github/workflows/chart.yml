@@ -51,3 +51,7 @@ jobs:
         run: |
           echo ${{ needs.release-please.outputs.tag_name }}
           echo "create helm release"
+
+  required-reusable:
+    needs: ["integration-test-reusable"]
+    uses: ./.github/workflows/required_reusable.yaml
