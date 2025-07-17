@@ -185,3 +185,7 @@ jobs:
           git push origin image-tag-sha-${{ github.sha }}
           gh pr create --base main --head image-tag-sha-${{ github.sha }} --fill
           gh pr merge --auto --squash
+
+  required-reusable:
+    needs: ["integration-test-reusable"]
+    uses: ./.github/workflows/required_reusable.yaml
