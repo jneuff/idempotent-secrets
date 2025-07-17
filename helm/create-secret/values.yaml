@@ -1,7 +1,7 @@
 image:
   repository: ghcr.io/jneuff
   name: create-secret
-  tag: sha-bac08a2868c18b69acac82d44d67f1f079e04dcd
+  tag: sha-62ae783c4c79d493f45ddf2f63b7fc75b211e9c4
 
 secretName:
 
