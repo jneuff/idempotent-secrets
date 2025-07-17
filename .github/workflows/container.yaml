@@ -177,8 +177,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git fetch origin
           git switch -c image-tag-sha-${{ github.sha }}
-          echo "image: sha-${{ github.sha }}" >> values.yaml
-          git add values.yaml
+          sed -i 's/sha-.\+/sha-${{ github.sha }}/' helm/create-secret/values.yaml
+          git add helm/create-secret/values.yaml
           git commit -m "deps: update image tag to sha-${{ github.sha }}"
           git push origin image-tag-sha-${{ github.sha }}
           gh pr create --base main --head image-tag-sha-${{ github.sha }} --fill
