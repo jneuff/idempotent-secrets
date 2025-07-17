@@ -131,6 +131,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   integration-test-reusable:
+    needs: build-and-push
     uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
 
   push-latest:
