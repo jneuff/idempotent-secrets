@@ -1,12 +1,12 @@
 {
-    "include-component-in-tag": true,
-    "tag-separator": "@",
+    "include-component-in-tag": false,
     "separate-pull-requests": true,
     "always-update": true,
+    "bootstrap-sha": "d2f76eb60204e9d4ddf14568c8a1b08fa7332ab5",
     "packages": {
         ".": {
-            "package-name": "image",
-            "release-type": "rust",
+            "package-name": "helm",
+            "release-type": "helm",
             "changelog-sections": [
                 {
                     "type": "feat",
@@ -25,10 +25,6 @@
                     "section": "Dependencies"
                 }
             ]
-        },
-        "helm/create-secret": {
-            "package-name": "helm",
-            "release-type": "helm"
         }
     }
 }
