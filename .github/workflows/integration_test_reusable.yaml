@@ -1,0 +1,28 @@
+name: Integration Test
+
+on:
+  workflow_call:
+
+jobs:
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kind
+        uses: helm/kind-action@v1.8.0
+        with:
+          node_image: kindest/node:v1.29.2
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.17.1
+
+      - name: Run integration tests
+        env:
+          GITHUB_CI: true
+          GITHUB_IMAGE_TAG: sha-${{ github.sha }}
+        run: cargo test --test helm --verbose

@@ -1,15 +1,21 @@
-name: CI/CD Pipeline
+name: Container Image Pipeline
 
 on:
   push:
     branches: [main]
-    tags:
-      - image@v*
+    paths:
+      - Containerfile
+      - src/**
+      - .github/workflows/container.yaml
   pull_request:
     branches: [main]
+    paths:
+      - Containerfile
+      - src/**
+      - .github/workflows/container.yaml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -122,33 +128,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  integration-test:
-    name: Integration Tests
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up kind
-        uses: helm/kind-action@v1.8.0
-        with:
-          node_image: kindest/node:v1.29.2
-
-      - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.17.1
-
-      - name: Run integration tests
-        env:
-          GITHUB_CI: true
-          GITHUB_IMAGE_TAG: sha-${{ github.sha }}
-        run: cargo test --test helm --verbose
+  integration-test-reusable:
+    uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
 
   push-latest:
     name: Push Latest Tag
-    needs: integration-test
+    needs: integration-test-reusable
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -169,27 +154,27 @@ jobs:
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-  push-semantic-version:
-    name: Push Semantic Version Tag
-    needs: integration-test
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'image@v')
+  update-image-in-chart:
+    needs: ["integration-test-reusable", "push-latest"]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
-
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.PAT_ACTIONS }}
     steps:
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull and retag image with semantic version
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Open PR to update image in chart
         run: |
-          tag=$(echo ${{ github.ref_name }} | sed 's/^image@v//')
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
-
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git fetch origin
+          git switch -c image-tag-sha-${{ github.sha }}
+          echo "image: sha-${{ github.sha }}" >> values.yaml
+          git add values.yaml
+          git commit -m "deps: update image tag to sha-${{ github.sha }}"
+          git push origin image-tag-sha-${{ github.sha }}
+          gh pr create --base main --head image-tag-sha-${{ github.sha }} --fill
+          gh pr merge --auto --squash
