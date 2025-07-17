@@ -4,13 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - CHANGELOG.md
       - helm/**
       - .github/workflows/chart.yml
   pull_request:
     branches: [main]
     paths:
-      - CHANGELOG.md
       - helm/**
       - .github/workflows/chart.yml
 
@@ -20,7 +18,7 @@ concurrency:
 
 jobs:
   integration-test-reusable:
-    uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
+    uses: ./.github/workflows/integration_test_reusable.yaml
 
   release-please:
     runs-on: ubuntu-latest

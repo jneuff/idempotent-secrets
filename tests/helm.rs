@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 const fn image_tag() -> &'static str {
     if let Some(sha) = option_env!("GITHUB_IMAGE_TAG") {
-        sha
+        if sha.is_empty() { "latest" } else { sha }
     } else {
         "local"
     }
@@ -135,9 +135,9 @@ fn test_helm_installation_and_secret_creation() {
         "--namespace",
         &namespace.name,
         "--set",
-        r#"secretName="rsa-key""#,
-        "--set",
         set_image_tag(),
+        "--set",
+        r#"secretName="rsa-key""#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -191,9 +191,9 @@ fn should_adhere_to_pod_security_standards() {
         "--namespace",
         &namespace.name,
         "--set",
-        r#"secretName="rsa-key""#,
-        "--set",
         set_image_tag(),
+        "--set",
+        r#"secretName="rsa-key""#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -222,9 +222,9 @@ fn should_install_two_releases_with_different_names() {
         "--namespace",
         &namespace.name,
         "--set",
-        r#"secretName="rsa-key""#,
-        "--set",
         set_image_tag(),
+        "--set",
+        r#"secretName="rsa-key""#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -248,9 +248,9 @@ fn should_install_two_releases_with_different_names() {
         "--namespace",
         &namespace.name,
         "--set",
-        r#"secretName="rsa-key-2""#,
-        "--set",
         set_image_tag(),
+        "--set",
+        r#"secretName="rsa-key-2""#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -282,9 +282,9 @@ fn should_allow_fullname_override() {
         "--namespace",
         &namespace.name,
         "--set",
-        r#"secretName="rsa-key""#,
-        "--set",
         set_image_tag(),
+        "--set",
+        r#"secretName="rsa-key""#,
         "--set",
         r#"fullnameOverride="custom-name""#,
         "--wait",

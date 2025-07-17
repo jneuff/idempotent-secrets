@@ -7,12 +7,14 @@ on:
       - Containerfile
       - src/**
       - .github/workflows/container.yaml
+      - .github/workflows/integration_test_reusable.yaml
   pull_request:
     branches: [main]
     paths:
       - Containerfile
       - src/**
       - .github/workflows/container.yaml
+      - .github/workflows/integration_test_reusable.yaml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -129,7 +131,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   integration-test-reusable:
-    uses: jneuff/create-secret/.github/workflows/integration_test_reusable.yaml@main
+    needs: build-and-push
+    with:
+      image_tag: sha-${{ github.sha }}
+    uses: ./.github/workflows/integration_test_reusable.yaml
 
   push-latest:
     name: Push Latest Tag
@@ -172,8 +177,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git fetch origin
           git switch -c image-tag-sha-${{ github.sha }}
-          echo "image: sha-${{ github.sha }}" >> values.yaml
-          git add values.yaml
+          sed -i 's/sha-.\+/sha-${{ github.sha }}/' helm/create-secret/values.yaml
+          git add helm/create-secret/values.yaml
           git commit -m "deps: update image tag to sha-${{ github.sha }}"
           git push origin image-tag-sha-${{ github.sha }}
           gh pr create --base main --head image-tag-sha-${{ github.sha }} --fill
