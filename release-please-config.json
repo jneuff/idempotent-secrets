@@ -5,7 +5,7 @@
     "bootstrap-sha": "d2f76eb60204e9d4ddf14568c8a1b08fa7332ab5",
     "packages": {
         ".": {
-            "package-name": "helm",
+            "package-name": "create-secret",
             "release-type": "helm",
             "changelog-sections": [
                 {
@@ -24,6 +24,9 @@
                     "type": "deps",
                     "section": "Dependencies"
                 }
+            ],
+            "extra-files": [
+                "helm/create-secret/Chart.yaml"
             ]
         }
     }
