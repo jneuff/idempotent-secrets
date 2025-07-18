@@ -28,7 +28,8 @@ jobs:
       !startsWith(github.event.pull_request.title, 'chore(main): release')
     needs: ["integration-test-reusable"]
     outputs:
-      release_created: ${{ steps.release-please.outputs.release_created }}
+      # beware of the footgun here `release_created` vs `releases_created`
+      is_release_created: ${{ steps.release-please.outputs.releases_created }}
       tag_name: ${{ steps.release-please.outputs.tag_name }}
     steps:
       - id: release-please
@@ -48,7 +49,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - if: ${{ needs.release-please.outputs.release_created }} && ${{ needs.integration-test-reusable.result }} == 'success'
+      - id: publish
+        if: ${{ needs.release-please.outputs.is_release_created == true }}
         run: |
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
           cd helm/create-secret
