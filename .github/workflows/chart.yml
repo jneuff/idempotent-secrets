@@ -6,6 +6,7 @@ on:
     paths:
       - helm/**
       - .github/workflows/chart.yml
+      - .release-please-manifest.json
   pull_request:
     branches: [main]
     paths:
