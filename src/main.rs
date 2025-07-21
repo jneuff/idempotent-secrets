@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 
 mod k8s;
 mod keypair;
+mod random_string;
 
 #[derive(Parser)]
 struct Args {
