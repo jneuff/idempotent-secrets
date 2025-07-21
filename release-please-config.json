@@ -2,7 +2,7 @@
     "include-component-in-tag": false,
     "separate-pull-requests": true,
     "always-update": true,
-    "bootstrap-sha": "d2f76eb60204e9d4ddf14568c8a1b08fa7332ab5",
+    "bootstrap-sha": "6d285d915f58027669119f62992424e4dbbe864f",
     "packages": {
         ".": {
             "package-name": "create-secret",
