@@ -1,6 +1,7 @@
 [package]
 name = "create-secret"
-version = "0.1.1"
+# We track the version exclusively via the Helm chart
+version = "0.0.0"
 edition = "2024"
 
 [dependencies]
