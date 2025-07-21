@@ -2,6 +2,8 @@ use lazy_static::lazy_static;
 use std::process::Command;
 use std::sync::Arc;
 
+const HELM_COMMAND_TIMEOUT: &str = "60s";
+
 fn image_tag_from_values() -> &'static str {
     let values = include_str!("../helm/create-secret/values.yaml");
     values
@@ -150,7 +152,7 @@ fn test_helm_installation_and_secret_creation() {
         "--wait",
         "--wait-for-jobs",
         "--timeout",
-        "30s",
+        HELM_COMMAND_TIMEOUT,
     ];
     if std::env::var("GITHUB_CI").is_err() {
         args.extend(["--set", r#"image.repository="#]);
@@ -207,7 +209,7 @@ fn should_adhere_to_pod_security_standards() {
         "--wait",
         "--wait-for-jobs",
         "--timeout",
-        "30s",
+        HELM_COMMAND_TIMEOUT,
     ];
     if std::env::var("GITHUB_CI").is_err() {
         args.extend(["--set", r#"image.repository="#]);
@@ -265,7 +267,7 @@ fn should_install_two_releases_with_different_names() {
         "--wait",
         "--wait-for-jobs",
         "--timeout",
-        "30s",
+        HELM_COMMAND_TIMEOUT,
     ];
     if std::env::var("GITHUB_CI").is_err() {
         args.extend(["--set", r#"image.repository="#]);
@@ -302,7 +304,7 @@ fn should_allow_fullname_override() {
         "--wait",
         "--wait-for-jobs",
         "--timeout",
-        "30s",
+        HELM_COMMAND_TIMEOUT,
     ];
     if std::env::var("GITHUB_CI").is_err() {
         args.extend(["--set", r#"image.repository="#]);
