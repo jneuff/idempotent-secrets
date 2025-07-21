@@ -258,7 +258,6 @@ dependencies = [
 name = "create-secret"
 version = "0.0.0"
 dependencies = [
- "base64 0.22.1",
  "clap",
  "k8s-openapi",
  "kube",
