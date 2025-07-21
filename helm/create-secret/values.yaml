@@ -3,6 +3,7 @@ image:
   name: create-secret
   tag: sha-c80a5ec3a5e5cf7ff3ba55acbf07a01dac0d42e9
 
-secretName:
+secret:
+  name:
 
 fullnameOverride: ""
