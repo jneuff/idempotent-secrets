@@ -29,7 +29,8 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_REGISTY_AND_IMAGE_NAME: ghcr.io/${{ github.repository }}/images/create-secret
+
 
 jobs:
   setup:
@@ -122,7 +123,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/jneuff/create-secret/images/create-secret
+          images: ${{ env.IMAGE_REGISTY_AND_IMAGE_NAME }}
           tags: |
             type=sha,format=long
             type=ref,event=branch
@@ -161,9 +162,9 @@ jobs:
 
       - name: Pull and retag image
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker pull ${{ env.IMAGE_REGISTY_AND_IMAGE_NAME }}:sha-${{ github.sha }}
+          docker tag ${{ env.IMAGE_REGISTY_AND_IMAGE_NAME }}:sha-${{ github.sha }} ${{ env.IMAGE_REGISTY_AND_IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_REGISTY_AND_IMAGE_NAME }}:latest
 
   update-image-in-chart:
     needs: ["integration-test-reusable", "push-latest"]
