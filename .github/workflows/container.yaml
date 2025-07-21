@@ -118,7 +118,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/jneuff/create-secret/images/create-secret
           tags: |
             type=sha,format=long
             type=ref,event=branch
