@@ -14,7 +14,7 @@ spec:
             - "create-secret"
             - --namespace
             - {{ .Release.Namespace }}
-            - {{ .Values.secretName }}
+            - {{ .Values.secret.name }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
