@@ -190,22 +190,23 @@ fn get_secret(secret_name: &str, namespace: &str) -> Result<String, anyhow::Erro
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
+fn enforce_pod_security_standards(namespace: &str) -> Result<(), anyhow::Error> {
+    Command::new("kubectl")
+        .args([
+            "label",
+            "namespace",
+            namespace,
+            "pod-security.kubernetes.io/enforce=restricted",
+        ])
+        .status()?;
+    Ok(())
+}
+
 #[test]
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
     let set_image_tag = set_image_tag();
-    // label namespace with pod-security.kubernetes.io/enforce: privileged
-    let status = Command::new("kubectl")
-        .args([
-            "label",
-            "namespace",
-            &namespace.name,
-            "pod-security.kubernetes.io/enforce=restricted",
-        ])
-        .status()
-        .expect("Failed to execute kubectl label namespace command");
-
-    assert!(status.success(), "Failed to label namespace");
+    enforce_pod_security_standards(&namespace.name).unwrap();
 
     let mut args = vec![
         "install",
