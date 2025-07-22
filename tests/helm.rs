@@ -166,35 +166,47 @@ fn test_helm_installation_and_secret_creation() {
     assert!(status.success(), "Failed to install Helm chart");
 
     // Verify secret creation
-    let output = Command::new("kubectl")
-        .args(["get", "secret", secret_name, "-n", &namespace.name])
-        .output()
-        .expect("Failed to execute kubectl get secret command");
-
-    assert!(output.status.success(), "Secret was not created");
-    let output_str = String::from_utf8_lossy(&output.stdout);
+    let output_str = get_secret(secret_name, &namespace.name).unwrap();
     assert!(
         output_str.contains(secret_name),
         "Secret '{secret_name}' not found in output"
     );
 }
 
+fn get_secret(secret_name: &str, namespace: &str) -> Result<String, anyhow::Error> {
+    let output = Command::new("kubectl")
+        .args(["get", "secret", secret_name, "-n", namespace, "-oyaml"])
+        .output()
+        .expect("Failed to execute kubectl get secret command");
+
+    if !output.status.success() {
+        return Err(anyhow::anyhow!(
+            "{}\nstdout: {}\nstderr: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
+
+fn enforce_pod_security_standards(namespace: &str) -> Result<(), anyhow::Error> {
+    Command::new("kubectl")
+        .args([
+            "label",
+            "namespace",
+            namespace,
+            "pod-security.kubernetes.io/enforce=restricted",
+        ])
+        .status()?;
+    Ok(())
+}
+
 #[test]
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
     let set_image_tag = set_image_tag();
-    // label namespace with pod-security.kubernetes.io/enforce: privileged
-    let status = Command::new("kubectl")
-        .args([
-            "label",
-            "namespace",
-            &namespace.name,
-            "pod-security.kubernetes.io/enforce=restricted",
-        ])
-        .status()
-        .expect("Failed to execute kubectl label namespace command");
-
-    assert!(status.success(), "Failed to label namespace");
+    enforce_pod_security_standards(&namespace.name).unwrap();
 
     let mut args = vec![
         "install",
