@@ -166,17 +166,28 @@ fn test_helm_installation_and_secret_creation() {
     assert!(status.success(), "Failed to install Helm chart");
 
     // Verify secret creation
-    let output = Command::new("kubectl")
-        .args(["get", "secret", secret_name, "-n", &namespace.name])
-        .output()
-        .expect("Failed to execute kubectl get secret command");
-
-    assert!(output.status.success(), "Secret was not created");
-    let output_str = String::from_utf8_lossy(&output.stdout);
+    let output_str = get_secret(secret_name, &namespace.name).unwrap();
     assert!(
         output_str.contains(secret_name),
         "Secret '{secret_name}' not found in output"
     );
+}
+
+fn get_secret(secret_name: &str, namespace: &str) -> Result<String, anyhow::Error> {
+    let output = Command::new("kubectl")
+        .args(["get", "secret", secret_name, "-n", namespace, "-oyaml"])
+        .output()
+        .expect("Failed to execute kubectl get secret command");
+
+    if !output.status.success() {
+        return Err(anyhow::anyhow!(
+            "{}\nstdout: {}\nstderr: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
 #[test]

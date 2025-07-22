@@ -14,9 +14,10 @@ rsa = "0.9.8"
 tokio = { version = "1.46.1", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
-tokio = { version = "1.46.1", features = ["test-util", "tokio-macros"] }
+anyhow = "1.0.98"
 lazy_static = "1.4.0"
 stdext = "0.3.3"
+tokio = { version = "1.46.1", features = ["test-util", "tokio-macros"] }
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 3
