@@ -1,7 +1,7 @@
 {{/*
 Format the image field, handling empty registry cases
 */}}
-{{- define "create-secret.image" -}}
+{{- define "idempotent-secrets.image" -}}
 {{- if .Values.image.repository -}}
 {{- printf "%s/%s:%s" .Values.image.repository .Values.image.name .Values.image.tag -}}
 {{- else -}}
@@ -14,7 +14,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "create-secret.fullname" -}}
+{{- define "idempotent-secrets.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}

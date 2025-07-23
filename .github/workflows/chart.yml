@@ -53,10 +53,10 @@ jobs:
         if: ${{ needs.release-please.outputs.is_release_created == 'true' }}
         run: |
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          cd helm/create-secret
+          cd helm/idempotent-secrets
           helm package .
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io --username token --password-stdin
-          helm push *.tgz oci://ghcr.io/jneuff/create-secret/helm
+          helm push *.tgz oci://ghcr.io/jneuff/idempotent-secrets/helm
 
   required-reusable:
     needs: ["integration-test-reusable"]

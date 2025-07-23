@@ -61,14 +61,14 @@ mod test {
         let client = Client::try_default().await.unwrap();
         create_namespace(&client, "create").await.unwrap();
         let data = BTreeMap::from([("foo".to_string(), ByteString("bar".into()))]);
-        create_secret("create", "create-secret", Some(data.clone()))
+        create_secret("create", "idempotent-secrets", Some(data.clone()))
             .await
             .unwrap();
         let secrets: Api<Secret> = Api::namespaced(client, "create");
-        let actual_secret = secrets.get("create-secret").await.unwrap();
+        let actual_secret = secrets.get("idempotent-secrets").await.unwrap();
         assert_eq!(
             actual_secret.metadata.name,
-            Some("create-secret".to_string())
+            Some("idempotent-secrets".to_string())
         );
         assert_eq!(actual_secret.data.unwrap(), data);
     }

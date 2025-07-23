@@ -6,5 +6,5 @@ COPY Cargo.lock /app/Cargo.lock
 RUN cargo build --release
 
 FROM gcr.io/distroless/cc
-COPY --from=builder /app/target/release/create-secret /bin/create-secret
-CMD ["/bin/create-secret"]
+COPY --from=builder /app/target/release/idempotent-secrets /bin/idempotent-secrets
+CMD ["/bin/idempotent-secrets"]

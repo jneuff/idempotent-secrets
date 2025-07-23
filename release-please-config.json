@@ -5,7 +5,7 @@
     "bootstrap-sha": "87067a9efffd7488e155b39c7fdef2e0899fce9b",
     "packages": {
         ".": {
-            "package-name": "create-secret",
+            "package-name": "idempotent-secrets",
             "release-type": "helm",
             "changelog-sections": [
                 {
@@ -26,7 +26,7 @@
                 }
             ],
             "extra-files": [
-                "helm/create-secret/Chart.yaml"
+                "helm/idempotent-secrets/Chart.yaml"
             ]
         }
     }

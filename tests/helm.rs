@@ -5,7 +5,7 @@ use std::sync::Arc;
 const HELM_COMMAND_TIMEOUT: &str = "60s";
 
 fn image_tag_from_values() -> &'static str {
-    let values = include_str!("../helm/create-secret/values.yaml");
+    let values = include_str!("../helm/idempotent-secrets/values.yaml");
     values
         .lines()
         .find(|line| line.contains("tag:"))
@@ -31,7 +31,7 @@ struct Cluster {
 
 impl Cluster {
     fn ensure() -> Self {
-        let name = "create-secret-test".to_string();
+        let name = "idempotent-secrets-test".to_string();
 
         // Check if cluster already exists
         let output = Command::new("kind")
@@ -58,7 +58,7 @@ impl Cluster {
                 .args([
                     "load",
                     "docker-image",
-                    &format!("create-secret:{}", image_tag()),
+                    &format!("idempotent-secrets:{}", image_tag()),
                     "--name",
                     &name,
                 ])
@@ -141,8 +141,8 @@ fn test_helm_installation_and_secret_creation() {
     let mut args = vec![
         "upgrade",
         "--install",
-        "create-secret",
-        "./helm/create-secret",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
         "--namespace",
         &namespace.name,
         "--set",
@@ -210,8 +210,8 @@ fn should_adhere_to_pod_security_standards() {
 
     let mut args = vec![
         "install",
-        "create-secret",
-        "./helm/create-secret",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
         "--namespace",
         &namespace.name,
         "--set",
@@ -242,8 +242,8 @@ fn should_install_two_releases_with_different_names() {
 
     let mut args = vec![
         "install",
-        "create-secret",
-        "./helm/create-secret",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
         "--namespace",
         &namespace.name,
         "--set",
@@ -268,8 +268,8 @@ fn should_install_two_releases_with_different_names() {
 
     let mut args = vec![
         "install",
-        "create-secret-2",
-        "./helm/create-secret",
+        "idempotent-secrets-2",
+        "./helm/idempotent-secrets",
         "--namespace",
         &namespace.name,
         "--set",
@@ -303,8 +303,8 @@ fn should_allow_fullname_override() {
 
     let mut args = vec![
         "install",
-        "create-secret",
-        "./helm/create-secret",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
         "--namespace",
         &namespace.name,
         "--set",

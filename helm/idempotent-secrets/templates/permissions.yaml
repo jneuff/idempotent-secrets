@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
 rules:
 - apiGroups: [""] # "" indicates the core API group
   resources: ["secrets"]
@@ -15,11 +15,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
 roleRef:
   kind: Role
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
