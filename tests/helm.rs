@@ -173,7 +173,6 @@ fn test_helm_installation_and_secret_creation() {
     );
 }
 
-#[ignore]
 #[test]
 fn create_random_string_secret() {
     let namespace = given_a_namespace!();
