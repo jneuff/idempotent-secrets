@@ -3,7 +3,10 @@ image:
   name: idempotent-secrets
   tag: sha-7edb48a4bacb55a188293b73bcbb1e4a7b0bb32d
 
-secret:
-  name:
+secrets:
+#   - name: secret-1
+#     type: RsaKeypair
+#   - name: secret-2
+#     type: RandomString
 
 fullnameOverride: ""
