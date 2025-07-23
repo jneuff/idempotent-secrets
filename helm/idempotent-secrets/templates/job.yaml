@@ -1,20 +1,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "idempotent-secrets.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" $ }}
 spec:
   backoffLimit: 0
   template:
     spec:
       containers:
         - name: idempotent-secrets
-          image: {{ include "idempotent-secrets.image" . }}
+          image: {{ include "idempotent-secrets.image" $ }}
           imagePullPolicy: IfNotPresent
           args:
             - "idempotent-secrets"
             - --namespace
-            - {{ .Release.Namespace }}
-            - {{ .Values.secret.name }}
+            - {{ $.Release.Namespace }}
+{{- range $secret := .Values.secrets }}
+            - --json
+            - {{ $secret | toJson | quote }}
+{{- end }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -26,4 +29,5 @@ spec:
             seccompProfile:
               type: RuntimeDefault
       restartPolicy: Never
-      serviceAccountName: {{ include "idempotent-secrets.fullname" . }}
+      serviceAccountName: {{ include "idempotent-secrets.fullname" $ }}
+---

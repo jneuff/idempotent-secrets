@@ -147,8 +147,8 @@ fn test_helm_installation_and_secret_creation() {
         &namespace.name,
         "--set",
         &set_image_tag,
-        "--set",
-        r#"secret.name="rsa-key""#,
+        "--set-json",
+        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -171,6 +171,91 @@ fn test_helm_installation_and_secret_creation() {
         output_str.contains(secret_name),
         "Secret '{secret_name}' not found in output"
     );
+}
+
+#[ignore]
+#[test]
+fn create_random_string_secret() {
+    let namespace = given_a_namespace!();
+    let secret_name = "secret-1";
+    let set_image_tag = set_image_tag();
+
+    let mut args = vec![
+        "upgrade",
+        "--install",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
+        "--namespace",
+        &namespace.name,
+        "--set",
+        &set_image_tag,
+        "--set-json",
+        r#"secrets=[{"name":"secret-1", "type":"RandomString"}]"#,
+        "--wait",
+        "--wait-for-jobs",
+        "--timeout",
+        HELM_COMMAND_TIMEOUT,
+    ];
+    if std::env::var("GITHUB_CI").is_err() {
+        args.extend(["--set", r#"image.repository="#]);
+    }
+    // Install Helm chart
+    let status = Command::new("helm")
+        .args(args)
+        .status()
+        .expect("Failed to execute helm upgrade command");
+
+    assert!(status.success(), "Failed to install Helm chart");
+
+    // Verify secret creation
+    let output_str = get_secret(secret_name, &namespace.name).unwrap();
+    assert!(
+        output_str.contains(secret_name),
+        "Secret '{secret_name}' not found in output"
+    );
+}
+
+#[test]
+fn allow_multiple_secrets() {
+    let namespace = given_a_namespace!();
+    let secret_names = &["secret-1", "secret-2"];
+    let set_image_tag = set_image_tag();
+
+    let mut args = vec![
+        "upgrade",
+        "--install",
+        "idempotent-secrets",
+        "./helm/idempotent-secrets",
+        "--namespace",
+        &namespace.name,
+        "--set",
+        &set_image_tag,
+        "--set-json",
+        r#"secrets=[{"name":"secret-1", "type":"RsaKeypair"},{"name":"secret-2", "type":"RsaKeypair"}]"#,
+        "--wait",
+        "--wait-for-jobs",
+        "--timeout",
+        HELM_COMMAND_TIMEOUT,
+    ];
+    if std::env::var("GITHUB_CI").is_err() {
+        args.extend(["--set", r#"image.repository="#]);
+    }
+    // Install Helm chart
+    let status = Command::new("helm")
+        .args(args)
+        .status()
+        .expect("Failed to execute helm upgrade command");
+
+    assert!(status.success(), "Failed to install Helm chart");
+
+    // Verify secret creation
+    for secret_name in secret_names {
+        let output_str = get_secret(secret_name, &namespace.name).unwrap();
+        assert!(
+            output_str.contains(secret_name),
+            "Secret '{secret_name}' not found in output"
+        );
+    }
 }
 
 fn get_secret(secret_name: &str, namespace: &str) -> Result<String, anyhow::Error> {
@@ -205,6 +290,7 @@ fn enforce_pod_security_standards(namespace: &str) -> Result<(), anyhow::Error> 
 #[test]
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
+    let secret_name = "rsa-key";
     let set_image_tag = set_image_tag();
     enforce_pod_security_standards(&namespace.name).unwrap();
 
@@ -216,8 +302,8 @@ fn should_adhere_to_pod_security_standards() {
         &namespace.name,
         "--set",
         &set_image_tag,
-        "--set",
-        r#"secret.name="rsa-key""#,
+        "--set-json",
+        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -233,12 +319,18 @@ fn should_adhere_to_pod_security_standards() {
         .expect("Failed to execute helm install command");
 
     assert!(status.success(), "Failed to install Helm chart");
+    let output_str = get_secret(secret_name, &namespace.name).unwrap();
+    assert!(
+        output_str.contains(secret_name),
+        "Secret '{secret_name}' not found in output"
+    );
 }
 
 #[test]
 fn should_install_two_releases_with_different_names() {
     let namespace = given_a_namespace!();
     let set_image_tag = set_image_tag();
+    let secret_name = "rsa-key";
 
     let mut args = vec![
         "install",
@@ -248,8 +340,8 @@ fn should_install_two_releases_with_different_names() {
         &namespace.name,
         "--set",
         &set_image_tag,
-        "--set",
-        r#"secret.name="rsa-key""#,
+        "--set-json",
+        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -265,7 +357,13 @@ fn should_install_two_releases_with_different_names() {
         .expect("Failed to execute helm install command");
 
     assert!(status.success(), "Failed to install Helm chart");
+    let output_str = get_secret(secret_name, &namespace.name).unwrap();
+    assert!(
+        output_str.contains(secret_name),
+        "Secret '{secret_name}' not found in output"
+    );
 
+    let secret2_name = "rsa-key-2";
     let mut args = vec![
         "install",
         "idempotent-secrets-2",
@@ -274,8 +372,8 @@ fn should_install_two_releases_with_different_names() {
         &namespace.name,
         "--set",
         &set_image_tag,
-        "--set",
-        r#"secret.name="rsa-key-2""#,
+        "--set-json",
+        r#"secrets=[{"name":"rsa-key-2", "type":"RsaKeypair"}]"#,
         "--wait",
         "--wait-for-jobs",
         "--timeout",
@@ -294,6 +392,11 @@ fn should_install_two_releases_with_different_names() {
         status.success(),
         "Failed to install Helm chart a second time"
     );
+    let output_str = get_secret(secret2_name, &namespace.name).unwrap();
+    assert!(
+        output_str.contains(secret2_name),
+        "Secret '{secret2_name}' not found in output"
+    );
 }
 
 #[test]
@@ -309,8 +412,8 @@ fn should_allow_fullname_override() {
         &namespace.name,
         "--set",
         &set_image_tag,
-        "--set",
-        r#"secret.name="rsa-key""#,
+        "--set-json",
+        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--set",
         r#"fullnameOverride="custom-name""#,
         "--wait",
