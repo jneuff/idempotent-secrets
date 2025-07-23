@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/jneuff/idempotent-secrets/compare/v0.1.1...v0.2.0) (2025-07-23)
+
+
+### Features
+
+* support new RandomString secret type ([#88](https://github.com/jneuff/idempotent-secrets/issues/88)) ([309d492](https://github.com/jneuff/idempotent-secrets/commit/309d492df92627ca3b3d668ae2099a2f3ed54355))
+
+
+### Dependencies
+
+* update image tag to sha-309d492df92627ca3b3d668ae2099a2f3ed54355 ([#90](https://github.com/jneuff/idempotent-secrets/issues/90)) ([d3400cc](https://github.com/jneuff/idempotent-secrets/commit/d3400cc167e8b1348b6d0c238e4976d1f3f902f8))
+
 ## [0.1.1](https://github.com/jneuff/idempotent-secrets/compare/v0.1.0...v0.1.1) (2025-07-23)
 
 
