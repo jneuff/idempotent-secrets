@@ -261,22 +261,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "create-secret"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "clap",
- "k8s-openapi",
- "kube",
- "lazy_static",
- "rand",
- "rsa",
- "stdext",
- "tokio",
-]
-
-[[package]]
 name = "crypto-common"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -627,6 +611,22 @@ dependencies = [
  "tokio",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "idempotent-secrets"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "clap",
+ "k8s-openapi",
+ "kube",
+ "lazy_static",
+ "rand",
+ "rsa",
+ "stdext",
+ "tokio",
 ]
 
 [[package]]

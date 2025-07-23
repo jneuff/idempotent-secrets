@@ -29,7 +29,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   REGISTRY: ghcr.io
-  IMAGE_REGISTY_AND_IMAGE_NAME: ghcr.io/${{ github.repository }}/images/create-secret
+  IMAGE_REGISTY_AND_IMAGE_NAME: ghcr.io/${{ github.repository }}/images/idempotent-secrets
 
 
 jobs:
@@ -184,8 +184,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git fetch origin
           git switch -c image-tag-sha-${{ github.sha }}
-          sed -i 's/sha-.\+/sha-${{ github.sha }}/' helm/create-secret/values.yaml
-          git add helm/create-secret/values.yaml
+          sed -i 's/sha-.\+/sha-${{ github.sha }}/' helm/idempotent-secrets/values.yaml
+          git add helm/idempotent-secrets/values.yaml
           git commit -m "deps: update image tag to sha-${{ github.sha }}"
           git push origin image-tag-sha-${{ github.sha }}
           gh pr create --base main --head image-tag-sha-${{ github.sha }} --fill

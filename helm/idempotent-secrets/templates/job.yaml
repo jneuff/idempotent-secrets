@@ -1,17 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "create-secret.fullname" . }}
+  name: {{ include "idempotent-secrets.fullname" . }}
 spec:
   backoffLimit: 0
   template:
     spec:
       containers:
-        - name: create-secret
-          image: {{ include "create-secret.image" . }}
+        - name: idempotent-secrets
+          image: {{ include "idempotent-secrets.image" . }}
           imagePullPolicy: IfNotPresent
           args:
-            - "create-secret"
+            - "idempotent-secrets"
             - --namespace
             - {{ .Release.Namespace }}
             - {{ .Values.secret.name }}
@@ -26,4 +26,4 @@ spec:
             seccompProfile:
               type: RuntimeDefault
       restartPolicy: Never
-      serviceAccountName: {{ include "create-secret.fullname" . }}
+      serviceAccountName: {{ include "idempotent-secrets.fullname" . }}

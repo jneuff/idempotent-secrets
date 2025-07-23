@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/jneuff/create-secret/images
-  name: create-secret
+  repository: ghcr.io/jneuff/idempotent-secrets/images
+  name: idempotent-secrets
   tag: sha-828ffb6ad0b4594fb643a0d50a19ff339503e53b
 
 secret:
