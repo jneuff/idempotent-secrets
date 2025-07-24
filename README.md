@@ -32,7 +32,7 @@ REVISION: 1
 TEST SUITE: None
 
 # Inspect the secret
-kubectl get secrets --namespace demo secret-1 -oyaml
+$ kubectl get secrets --namespace demo secret-1 -oyaml
 apiVersion: v1
 data:
   private_key: LS0..S0K
