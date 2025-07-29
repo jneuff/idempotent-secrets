@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/jneuff/idempotent-secrets/compare/v0.2.0...v0.2.1) (2025-07-29)
+
+
+### Dependencies
+
+* bump tokio from 1.46.1 to 1.47.0 ([#93](https://github.com/jneuff/idempotent-secrets/issues/93)) ([277e50d](https://github.com/jneuff/idempotent-secrets/commit/277e50dbb91218e13bf9da5949480f5fdbe0148c))
+* update image tag to sha-277e50dbb91218e13bf9da5949480f5fdbe0148c ([#94](https://github.com/jneuff/idempotent-secrets/issues/94)) ([c159857](https://github.com/jneuff/idempotent-secrets/commit/c159857b33e6c99a146a8234182aefd5ccb15a4c))
+
 ## [0.2.0](https://github.com/jneuff/idempotent-secrets/compare/v0.1.1...v0.2.0) (2025-07-23)
 
 
