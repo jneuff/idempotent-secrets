@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/jneuff/idempotent-secrets/compare/v0.2.1...v0.3.0) (2025-07-31)
+
+
+### Features
+
+* switch to a chiseled ubuntu image ([#97](https://github.com/jneuff/idempotent-secrets/issues/97)) ([1cd9017](https://github.com/jneuff/idempotent-secrets/commit/1cd9017299e6a078fb856efafe2ac5d31f27a063))
+
+
+### Dependencies
+
+* bump clap from 4.5.41 to 4.5.42 ([#96](https://github.com/jneuff/idempotent-secrets/issues/96)) ([9cb7ac1](https://github.com/jneuff/idempotent-secrets/commit/9cb7ac1fc901c9ffef967a3ae571f4617d03d601))
+* update image tag to sha-1cd9017299e6a078fb856efafe2ac5d31f27a063 ([#100](https://github.com/jneuff/idempotent-secrets/issues/100)) ([6ff101e](https://github.com/jneuff/idempotent-secrets/commit/6ff101efc7de62ef2d2c3c9d32dc3b292ba1ee0b))
+* update image tag to sha-9cb7ac1fc901c9ffef967a3ae571f4617d03d601 ([#98](https://github.com/jneuff/idempotent-secrets/issues/98)) ([50fdd69](https://github.com/jneuff/idempotent-secrets/commit/50fdd69a8b6237f614f477edc35297dd8f883ad7))
+
 ## [0.2.1](https://github.com/jneuff/idempotent-secrets/compare/v0.2.0...v0.2.1) (2025-07-29)
 
 
