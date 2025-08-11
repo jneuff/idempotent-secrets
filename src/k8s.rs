@@ -84,4 +84,33 @@ mod test {
             .await
             .unwrap();
     }
+
+    fn any_secret_data() -> BTreeMap<String, ByteString> {
+        BTreeMap::from([("foo".to_string(), ByteString("bar".into()))])
+    }
+
+    async fn get_secret(namespace: &str, name: &str) -> Option<Secret> {
+        let client = Client::try_default().await.unwrap();
+        let secrets: Api<Secret> = Api::namespaced(client, namespace);
+        secrets.get(name).await.ok()
+    }
+
+    #[tokio::test]
+    async fn should_create_and_get_secret() {
+        let client = Client::try_default().await.unwrap();
+        create_namespace(&client, "new-test-1").await.unwrap();
+        let expected = any_secret_data();
+
+        create_secret("idempotent", "secret-1", Some(expected.clone()))
+            .await
+            .unwrap();
+
+        let actual = get_secret("idempotent", "secret-1")
+            .await
+            .unwrap()
+            .data
+            .unwrap();
+
+        assert_eq!(actual, expected)
+    }
 }
