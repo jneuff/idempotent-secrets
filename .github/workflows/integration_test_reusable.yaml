@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   integration-test:
-    name: Integration Tests
+    name: Helm Integration Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
