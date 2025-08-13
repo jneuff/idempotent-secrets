@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.3](https://github.com/jneuff/idempotent-secrets/compare/v0.3.2...v0.3.3) (2025-08-13)
+
+
+### Bug Fixes
+
+* ensure inner idempotency ([#118](https://github.com/jneuff/idempotent-secrets/issues/118)) ([2ceec9e](https://github.com/jneuff/idempotent-secrets/commit/2ceec9e74223de0fdce2ee7b657f1480edcffe78))
+
+
+### Dependencies
+
+* bump clap from 4.5.44 to 4.5.45 ([#115](https://github.com/jneuff/idempotent-secrets/issues/115)) ([a6fe5f1](https://github.com/jneuff/idempotent-secrets/commit/a6fe5f1f3794096e1b0cc88206d3719aedb18736))
+* update image tag to sha-2ceec9e74223de0fdce2ee7b657f1480edcffe78 ([#120](https://github.com/jneuff/idempotent-secrets/issues/120)) ([2a8329a](https://github.com/jneuff/idempotent-secrets/commit/2a8329add85f5f4fa989e8b43090b9c8415da499))
+* update image tag to sha-a6fe5f1f3794096e1b0cc88206d3719aedb18736 ([#116](https://github.com/jneuff/idempotent-secrets/issues/116)) ([ff90415](https://github.com/jneuff/idempotent-secrets/commit/ff90415768ce2129eacbad62c501e8730a1d608f))
+
 ## [0.3.2](https://github.com/jneuff/idempotent-secrets/compare/v0.3.1...v0.3.2) (2025-08-12)
 
 
