@@ -22,6 +22,15 @@ enum Secret {
     RandomString { name: String },
 }
 
+impl Secret {
+    fn name(&self) -> &str {
+        match self {
+            Secret::RsaKeypair { name } => name,
+            Secret::RandomString { name } => name,
+        }
+    }
+}
+
 fn parse_secret(raw: &str) -> Result<Secret, Box<dyn std::error::Error + Send + Sync + 'static>> {
     let secret: Secret = serde_json::from_str(raw)?;
     Ok(secret)
@@ -58,6 +67,13 @@ async fn handle_secret(secret: &Secret, namespace: &str) -> Result<(), anyhow::E
 async fn main() {
     let args = Args::parse();
     for secret in args.json {
+        if k8s::get_secret(&args.namespace, secret.name())
+            .await
+            .is_some()
+        {
+            println!("Secret {} already exists, skipping", secret.name());
+            continue;
+        }
         let result = handle_secret(&secret, &args.namespace).await;
         if let Err(e) = result {
             eprintln!("Error creating secret {secret:?}: {e}");

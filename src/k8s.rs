@@ -18,6 +18,12 @@ fn secret(name: &str, data: Option<BTreeMap<String, ByteString>>) -> Secret {
     }
 }
 
+pub async fn get_secret(namespace: &str, name: &str) -> Option<Secret> {
+    let client = Client::try_default().await.unwrap();
+    let secrets: Api<Secret> = Api::namespaced(client, namespace);
+    secrets.get(name).await.ok()
+}
+
 pub async fn create_secret(
     namespace: &str,
     name: &str,
@@ -26,9 +32,6 @@ pub async fn create_secret(
     let client = Client::try_default().await.unwrap();
     let secrets: Api<Secret> = Api::namespaced(client, namespace);
     let new_secret = secret(name, data);
-    if secrets.get(name).await.is_ok() {
-        return Ok(());
-    }
     secrets
         .create(&PostParams::default(), &new_secret)
         .await
@@ -87,12 +90,6 @@ mod test {
 
     fn any_secret_data() -> BTreeMap<String, ByteString> {
         BTreeMap::from([("foo".to_string(), ByteString("bar".into()))])
-    }
-
-    async fn get_secret(namespace: &str, name: &str) -> Option<Secret> {
-        let client = Client::try_default().await.unwrap();
-        let secrets: Api<Secret> = Api::namespaced(client, namespace);
-        secrets.get(name).await.ok()
     }
 
     #[tokio::test]
