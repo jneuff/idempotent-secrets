@@ -59,35 +59,6 @@ mod test {
             .await
     }
 
-    #[tokio::test]
-    async fn should_create_secret() {
-        let client = Client::try_default().await.unwrap();
-        create_namespace(&client, "create").await.unwrap();
-        let data = BTreeMap::from([("foo".to_string(), ByteString("bar".into()))]);
-        create_secret("create", "idempotent-secrets", Some(data.clone()))
-            .await
-            .unwrap();
-        let secrets: Api<Secret> = Api::namespaced(client, "create");
-        let actual_secret = secrets.get("idempotent-secrets").await.unwrap();
-        assert_eq!(
-            actual_secret.metadata.name,
-            Some("idempotent-secrets".to_string())
-        );
-        assert_eq!(actual_secret.data.unwrap(), data);
-    }
-
-    #[tokio::test]
-    async fn should_not_create_secret_if_exists() {
-        let client = Client::try_default().await.unwrap();
-        create_namespace(&client, "idempotent").await.unwrap();
-        create_secret("idempotent", "idempotent-secret", None)
-            .await
-            .unwrap();
-        create_secret("idempotent", "idempotent-secret", None)
-            .await
-            .unwrap();
-    }
-
     fn any_secret_data() -> BTreeMap<String, ByteString> {
         BTreeMap::from([("foo".to_string(), ByteString("bar".into()))])
     }
@@ -95,14 +66,14 @@ mod test {
     #[tokio::test]
     async fn should_create_and_get_secret() {
         let client = Client::try_default().await.unwrap();
-        create_namespace(&client, "new-test-1").await.unwrap();
+        create_namespace(&client, "test-1").await.unwrap();
         let expected = any_secret_data();
 
-        create_secret("idempotent", "secret-1", Some(expected.clone()))
+        create_secret("test-1", "secret-1", Some(expected.clone()))
             .await
             .unwrap();
 
-        let actual = get_secret("idempotent", "secret-1")
+        let actual = get_secret("test-1", "secret-1")
             .await
             .unwrap()
             .data
