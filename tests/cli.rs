@@ -22,6 +22,11 @@ impl IdempotentSecrets {
     }
 
     fn run(self) -> Result<Output, std::io::Error> {
+        dbg!(
+            "running in namespace {} in cluster {}",
+            &self.namespace,
+            CLUSTER.name()
+        );
         let mut args = vec!["run", "--", "--namespace", &self.namespace];
         for secret in &self.secrets {
             args.push("--json");
