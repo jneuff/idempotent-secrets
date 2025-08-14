@@ -3,25 +3,8 @@ use serde_json::Value;
 use std::process::Command;
 use std::sync::Arc;
 
-fn image_tag_from_values() -> &'static str {
-    let values = include_str!("../helm/idempotent-secrets/values.yaml");
-    values
-        .lines()
-        .find(|line| line.contains("tag:"))
-        .and_then(|line| line.split("tag: ").last())
-        .expect("tag must be set")
-}
-
-pub fn image_tag() -> &'static str {
-    match option_env!("GITHUB_IMAGE_TAG") {
-        Some("") => image_tag_from_values(),
-        Some(sha) => sha,
-        None => "local",
-    }
-}
-
-struct Cluster {
-    _name: String,
+pub struct Cluster {
+    name: String,
 }
 
 impl Cluster {
@@ -47,22 +30,11 @@ impl Cluster {
             assert!(status.success(), "Failed to create kind cluster");
         }
 
-        if std::env::var("GITHUB_CI").is_err() {
-            // Load docker image
-            let status = Command::new("kind")
-                .args([
-                    "load",
-                    "docker-image",
-                    &format!("idempotent-secrets:{}", image_tag()),
-                    "--name",
-                    &name,
-                ])
-                .status()
-                .expect("Failed to execute kind load docker-image command");
-            assert!(status.success(), "Failed to load docker image");
-        }
+        Self { name }
+    }
 
-        Self { _name: name }
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     fn create_namespace(&self, name: &str) -> Result<(), kube::Error> {
@@ -105,7 +77,7 @@ impl TestNamespace {
 }
 
 lazy_static! {
-    static ref CLUSTER: Arc<Cluster> = Arc::new(Cluster::ensure());
+    pub static ref CLUSTER: Arc<Cluster> = Arc::new(Cluster::ensure());
 }
 
 pub fn namespace(name: &str) -> TestNamespace {

@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use std::process::{Command, ExitStatus};
 
 mod helpers;
@@ -7,33 +8,70 @@ use serde_json::{Value, json};
 
 const HELM_COMMAND_TIMEOUT: &str = "60s";
 
-pub fn set_image_tag() -> String {
+lazy_static! {
+    static ref IMAGE_TAG: String = initialize_image_tag();
+}
+
+fn image_tag_from_values() -> &'static str {
+    let values = include_str!("../helm/idempotent-secrets/values.yaml");
+    values
+        .lines()
+        .find(|line| line.contains("tag:"))
+        .and_then(|line| line.split("tag: ").last())
+        .expect("tag must be set")
+}
+
+fn image_tag() -> &'static str {
+    match option_env!("GITHUB_IMAGE_TAG") {
+        Some("") => image_tag_from_values(),
+        Some(sha) => sha,
+        None => "local",
+    }
+}
+
+fn load_image() {
+    if std::env::var("GITHUB_CI").is_err() {
+        // Load docker image
+        let status = Command::new("kind")
+            .args([
+                "load",
+                "docker-image",
+                &format!("idempotent-secrets:{}", image_tag()),
+                "--name",
+                CLUSTER.name(),
+            ])
+            .status()
+            .expect("Failed to execute kind load docker-image command");
+        assert!(status.success(), "Failed to load docker image");
+    }
+}
+
+fn initialize_image_tag() -> String {
+    load_image();
     format!(r#"image.tag={}"#, image_tag())
 }
 
 pub struct HelmUpgrade {
     namespace: String,
     release_name: String,
-    image_tag: String,
     secrets: Vec<Value>,
 }
 
 impl HelmUpgrade {
-    pub fn in_namespace(namespace: &str) -> Self {
+    fn in_namespace(namespace: &str) -> Self {
         Self {
             namespace: namespace.to_string(),
             release_name: "idempotent-secrets".to_string(),
-            image_tag: set_image_tag(),
             secrets: vec![],
         }
     }
 
-    pub fn with_secret(mut self, secret: Value) -> Self {
+    fn with_secret(mut self, secret: Value) -> Self {
         self.secrets.push(secret);
         self
     }
 
-    pub fn release_name(self, release_name: &str) -> Self {
+    fn release_name(self, release_name: &str) -> Self {
         Self {
             release_name: release_name.to_string(),
             ..self
@@ -44,7 +82,7 @@ impl HelmUpgrade {
         format!("secrets={}", serde_json::to_string(&self.secrets).unwrap())
     }
 
-    pub fn run(self) -> Result<ExitStatus, anyhow::Error> {
+    fn run(self) -> Result<ExitStatus, anyhow::Error> {
         let secrets = self.secrets();
         let mut args = vec![
             "upgrade",
@@ -54,7 +92,7 @@ impl HelmUpgrade {
             "--namespace",
             &self.namespace,
             "--set",
-            &self.image_tag,
+            &IMAGE_TAG,
             "--set-json",
             &secrets,
             "--wait",
@@ -75,7 +113,6 @@ impl HelmUpgrade {
 fn test_helm_installation_and_secret_creation() {
     let namespace = given_a_namespace!();
     let secret_name = "rsa-key";
-    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "upgrade",
@@ -85,7 +122,7 @@ fn test_helm_installation_and_secret_creation() {
         "--namespace",
         &namespace.name(),
         "--set",
-        &set_image_tag,
+        &IMAGE_TAG,
         "--set-json",
         r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--wait",
@@ -132,7 +169,6 @@ fn create_random_string_secret() {
 fn allow_multiple_secrets() {
     let namespace = given_a_namespace!();
     let secret_names = &["secret-1", "secret-2"];
-    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "upgrade",
@@ -142,7 +178,7 @@ fn allow_multiple_secrets() {
         "--namespace",
         &namespace.name(),
         "--set",
-        &set_image_tag,
+        &IMAGE_TAG,
         "--set-json",
         r#"secrets=[{"name":"secret-1", "type":"RsaKeypair"},{"name":"secret-2", "type":"RsaKeypair"}]"#,
         "--wait",
@@ -184,7 +220,6 @@ fn enforce_pod_security_standards(namespace: &str) -> Result<(), anyhow::Error> 
 fn should_adhere_to_pod_security_standards() {
     let namespace = given_a_namespace!();
     let secret_name = "rsa-key";
-    let set_image_tag = set_image_tag();
     enforce_pod_security_standards(namespace.name()).unwrap();
 
     let mut args = vec![
@@ -194,7 +229,7 @@ fn should_adhere_to_pod_security_standards() {
         "--namespace",
         &namespace.name(),
         "--set",
-        &set_image_tag,
+        &IMAGE_TAG,
         "--set-json",
         r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--wait",
@@ -253,7 +288,6 @@ fn should_install_two_releases_with_different_names() {
 #[test]
 fn should_allow_fullname_override() {
     let namespace = given_a_namespace!();
-    let set_image_tag = set_image_tag();
 
     let mut args = vec![
         "install",
@@ -262,7 +296,7 @@ fn should_allow_fullname_override() {
         "--namespace",
         &namespace.name(),
         "--set",
-        &set_image_tag,
+        &IMAGE_TAG,
         "--set-json",
         r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
         "--set",

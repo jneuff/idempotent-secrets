@@ -94,8 +94,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Create cluster
         run: kwokctl create cluster --name test-cluster --wait 60s
-      - name: Run tests
+      - name: Run unit tests
         run: cargo test --bins --verbose
+      - name: Run integration tests
+        run: cargo test --test cli --verbose
 
   build-and-push:
     name: Build and Push Container
