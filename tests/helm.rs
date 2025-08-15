@@ -55,6 +55,7 @@ pub struct HelmUpgrade {
     namespace: String,
     release_name: String,
     secrets: Vec<Value>,
+    values: Vec<(String, String)>,
 }
 
 impl HelmUpgrade {
@@ -63,6 +64,7 @@ impl HelmUpgrade {
             namespace: namespace.to_string(),
             release_name: "idempotent-secrets".to_string(),
             secrets: vec![],
+            values: vec![],
         }
     }
 
@@ -76,6 +78,11 @@ impl HelmUpgrade {
             release_name: release_name.to_string(),
             ..self
         }
+    }
+
+    fn set(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.values.push((key.into(), value.into()));
+        self
     }
 
     fn secrets(&self) -> String {
@@ -103,45 +110,35 @@ impl HelmUpgrade {
         if std::env::var("GITHUB_CI").is_err() {
             args.extend(["--set", r#"image.repository="#]);
         }
+        let rendered_values = self
+            .values
+            .iter()
+            .map(|(key, value)| format!("{}={}", key, value))
+            .collect::<Vec<_>>();
+        for value in rendered_values.iter() {
+            args.extend(["--set", value]);
+        }
         Command::new("helm")
             .args(&args)
             .status()
             .map_err(|e| anyhow::anyhow!("Failed to execute helm upgrade command: {}", e))
     }
 }
+
 #[test]
-fn test_helm_installation_and_secret_creation() {
+fn create_rsa_keypair_secret() {
     let namespace = given_a_namespace!();
     let secret_name = "rsa-key";
 
-    let mut args = vec![
-        "upgrade",
-        "--install",
-        "idempotent-secrets",
-        "./helm/idempotent-secrets",
-        "--namespace",
-        &namespace.name(),
-        "--set",
-        &IMAGE_TAG,
-        "--set-json",
-        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
-        "--wait",
-        "--wait-for-jobs",
-        "--timeout",
-        HELM_COMMAND_TIMEOUT,
-    ];
-    if std::env::var("GITHUB_CI").is_err() {
-        args.extend(["--set", r#"image.repository="#]);
-    }
-    // Install Helm chart
-    let status = Command::new("helm")
-        .args(args)
-        .status()
-        .expect("Failed to execute helm upgrade command");
-
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .with_secret(json!({
+            "name": secret_name,
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
     assert!(status.success(), "Failed to install Helm chart");
 
-    // Verify secret creation
     let secret = kubectl_get_secret(namespace.name(), secret_name).unwrap();
     assert_eq!(secret["metadata"]["name"].as_str().unwrap(), secret_name);
 }
@@ -166,37 +163,22 @@ fn create_random_string_secret() {
 }
 
 #[test]
-fn allow_multiple_secrets() {
+fn configure_multiple_secrets() {
     let namespace = given_a_namespace!();
     let secret_names = &["secret-1", "secret-2"];
 
-    let mut args = vec![
-        "upgrade",
-        "--install",
-        "idempotent-secrets",
-        "./helm/idempotent-secrets",
-        "--namespace",
-        &namespace.name(),
-        "--set",
-        &IMAGE_TAG,
-        "--set-json",
-        r#"secrets=[{"name":"secret-1", "type":"RsaKeypair"},{"name":"secret-2", "type":"RsaKeypair"}]"#,
-        "--wait",
-        "--wait-for-jobs",
-        "--timeout",
-        HELM_COMMAND_TIMEOUT,
-    ];
-    if std::env::var("GITHUB_CI").is_err() {
-        args.extend(["--set", r#"image.repository="#]);
-    }
-    // Install Helm chart
-    let status = Command::new("helm")
-        .args(args)
-        .status()
-        .expect("Failed to execute helm upgrade command");
-
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .with_secret(json!({
+            "name": secret_names[0],
+            "type": "RsaKeypair",
+        }))
+        .with_secret(json!({
+            "name": secret_names[1],
+            "type": "RandomString",
+        }))
+        .run()
+        .unwrap();
     assert!(status.success(), "Failed to install Helm chart");
-
     // Verify secret creation
     for secret_name in secret_names {
         let secret = kubectl_get_secret(namespace.name(), secret_name).unwrap();
@@ -222,37 +204,20 @@ fn should_adhere_to_pod_security_standards() {
     let secret_name = "rsa-key";
     enforce_pod_security_standards(namespace.name()).unwrap();
 
-    let mut args = vec![
-        "install",
-        "idempotent-secrets",
-        "./helm/idempotent-secrets",
-        "--namespace",
-        &namespace.name(),
-        "--set",
-        &IMAGE_TAG,
-        "--set-json",
-        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
-        "--wait",
-        "--wait-for-jobs",
-        "--timeout",
-        HELM_COMMAND_TIMEOUT,
-    ];
-    if std::env::var("GITHUB_CI").is_err() {
-        args.extend(["--set", r#"image.repository="#]);
-    }
-    // Install Helm chart
-    let status = Command::new("helm")
-        .args(args)
-        .status()
-        .expect("Failed to execute helm install command");
-
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .with_secret(json!({
+            "name": secret_name,
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
     assert!(status.success(), "Failed to install Helm chart");
     let secret = kubectl_get_secret(namespace.name(), secret_name).unwrap();
     assert_eq!(secret["metadata"]["name"].as_str().unwrap(), secret_name);
 }
 
 #[test]
-fn should_install_two_releases_with_different_names() {
+fn install_two_releases_with_different_names() {
     let namespace = given_a_namespace!();
     let secret_name = "rsa-key";
 
@@ -286,35 +251,17 @@ fn should_install_two_releases_with_different_names() {
 }
 
 #[test]
-fn should_allow_fullname_override() {
+fn supports_fullname_override() {
     let namespace = given_a_namespace!();
 
-    let mut args = vec![
-        "install",
-        "idempotent-secrets",
-        "./helm/idempotent-secrets",
-        "--namespace",
-        &namespace.name(),
-        "--set",
-        &IMAGE_TAG,
-        "--set-json",
-        r#"secrets=[{"name":"rsa-key", "type":"RsaKeypair"}]"#,
-        "--set",
-        r#"fullnameOverride="custom-name""#,
-        "--wait",
-        "--wait-for-jobs",
-        "--timeout",
-        HELM_COMMAND_TIMEOUT,
-    ];
-    if std::env::var("GITHUB_CI").is_err() {
-        args.extend(["--set", r#"image.repository="#]);
-    }
-    // Install Helm chart
-    let status = Command::new("helm")
-        .args(args)
-        .status()
-        .expect("Failed to execute helm install command");
-
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .set("fullnameOverride", "custom-name")
+        .with_secret(json!({
+            "name": "rsa-key",
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
     assert!(status.success(), "Failed to install Helm chart");
 
     let output = Command::new("kubectl")
