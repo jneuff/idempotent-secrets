@@ -312,3 +312,45 @@ fn supports_fullname_override() {
         "Role name does not contain custom-name"
     );
 }
+
+fn helm_uninstall(namespace: &str, release_name: &str) -> Result<ExitStatus, anyhow::Error> {
+    Command::new("helm")
+        .args([
+            "uninstall",
+            release_name,
+            "--namespace",
+            namespace,
+            "--wait",
+            "--timeout",
+            HELM_COMMAND_TIMEOUT,
+        ])
+        .status()
+        .map_err(|e| anyhow::anyhow!("Failed to execute helm uninstall command: {}", e))
+}
+
+#[should_panic]
+#[test]
+fn deletes_secrets_when_uninstalled() {
+    let namespace = given_a_namespace!();
+    let secret_name = "rsa-key";
+    let release_name = "idempotent-secrets";
+
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .release_name(release_name)
+        .with_secret(json!({
+            "name": secret_name,
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
+    assert!(status.success(), "Failed to install Helm chart");
+
+    let secret = kubectl_get_secret(namespace.name(), secret_name).unwrap();
+    assert_eq!(secret["metadata"]["name"].as_str().unwrap(), secret_name);
+
+    let status = helm_uninstall(namespace.name(), release_name).unwrap();
+    assert!(status.success(), "Failed to uninstall Helm chart");
+
+    let result = kubectl_get_secret(namespace.name(), secret_name);
+    assert!(result.is_err(), "Secret should not exist");
+}
