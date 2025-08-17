@@ -1,21 +1,35 @@
 use std::collections::BTreeMap;
 
 pub use k8s_openapi::ByteString;
-use k8s_openapi::{api::core::v1::Secret, apimachinery::pkg::apis::meta::v1::OwnerReference};
+use k8s_openapi::{
+    api::core::v1::Secret, apimachinery::pkg::apis::meta::v1::OwnerReference as KubeOwnerReference,
+};
 use kube::{
     Api, Client,
     api::{ObjectMeta, PostParams},
 };
 
+use crate::OwnerReference;
+
+fn to_kube_owner_reference(owner_reference: &OwnerReference) -> KubeOwnerReference {
+    KubeOwnerReference {
+        api_version: owner_reference.api_version.clone(),
+        kind: owner_reference.kind.clone(),
+        name: owner_reference.name.clone(),
+        uid: owner_reference.uid.clone(),
+        ..Default::default()
+    }
+}
+
 fn secret(
     name: &str,
     data: Option<BTreeMap<String, ByteString>>,
-    owner_reference: Option<OwnerReference>,
+    owner_reference: Option<&OwnerReference>,
 ) -> Secret {
     Secret {
         metadata: ObjectMeta {
             name: Some(name.to_string()),
-            owner_references: owner_reference.map(|owner| vec![owner]),
+            owner_references: owner_reference.map(|owner| vec![to_kube_owner_reference(owner)]),
             ..Default::default()
         },
         data,
@@ -33,7 +47,7 @@ pub async fn create_secret(
     namespace: &str,
     name: &str,
     data: Option<BTreeMap<String, ByteString>>,
-    owner_reference: Option<OwnerReference>,
+    owner_reference: Option<&OwnerReference>,
 ) -> Result<(), kube::Error> {
     let client = Client::try_default().await.unwrap();
     let secrets: Api<Secret> = Api::namespaced(client, namespace);
@@ -122,14 +136,13 @@ mod test {
             kind: "ConfigMap".to_string(),
             name: config_map.metadata.name.unwrap(),
             uid: config_map.metadata.uid.unwrap(),
-            ..Default::default()
         };
 
         create_secret(
             namespace,
             "secret-2",
             Some(any_secret_data()),
-            Some(owner_reference),
+            Some(&owner_reference),
         )
         .await
         .unwrap();
