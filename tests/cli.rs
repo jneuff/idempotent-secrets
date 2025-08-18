@@ -2,6 +2,8 @@ mod helpers;
 use std::process::{Command, Output};
 
 use helpers::*;
+use serde::Serialize;
+use serde_json::{Value, json};
 
 struct IdempotentSecrets {
     secrets: Vec<String>,
@@ -18,13 +20,13 @@ impl IdempotentSecrets {
         }
     }
 
-    fn with_secret(mut self, secret: impl Into<String>) -> Self {
-        self.secrets.push(secret.into());
+    fn with_secret(mut self, secret: impl Serialize) -> Self {
+        self.secrets.push(serde_json::to_string(&secret).unwrap());
         self
     }
 
-    fn set_owner(mut self, owner_reference: impl Into<String>) -> Self {
-        self.owner_reference = Some(owner_reference.into());
+    fn set_owner(mut self, owner_reference: impl Serialize) -> Self {
+        self.owner_reference = Some(serde_json::to_string(&owner_reference).unwrap());
         self
     }
 
@@ -62,7 +64,7 @@ fn is_idempotent() {
     let namespace = given_a_namespace!();
 
     let output = IdempotentSecrets::in_namespace(namespace.name())
-        .with_secret(r#"{"name":"secret-1", "type":"RandomString"}"#)
+        .with_secret(json!({ "name": "secret-1", "type": "RandomString" }))
         .run()
         .unwrap();
 
@@ -70,7 +72,7 @@ fn is_idempotent() {
     let secret_1 = kubectl_get_secret(namespace.name(), "secret-1").unwrap();
 
     let output = IdempotentSecrets::in_namespace(namespace.name())
-        .with_secret(r#"{"name":"secret-1", "type":"RandomString"}"#)
+        .with_secret(json!({ "name": "secret-1", "type": "RandomString" }))
         .run()
         .unwrap();
 
@@ -79,16 +81,41 @@ fn is_idempotent() {
     assert_eq!(secret_1, secret_2);
 }
 
-#[should_panic]
+fn kubectl_create_config_map(namespace: &str, name: &str) -> Result<Value, anyhow::Error> {
+    Command::new("kubectl")
+        .args(["create", "configmap", name, "--namespace", namespace])
+        .status()
+        .unwrap();
+
+    let output = Command::new("kubectl")
+        .args(["get", "configmap", name, "-n", namespace, "-ojson"])
+        .output()
+        .expect("Failed to execute kubectl get configmap command");
+
+    if !output.status.success() {
+        return Err(anyhow::anyhow!(
+            "{}\nstdout: {}\nstderr: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    Ok(serde_json::from_slice(&output.stdout)?)
+}
+
 #[test]
 fn sets_owner_reference() {
     let namespace = given_a_namespace!();
+    let config_map = kubectl_create_config_map(namespace.name(), "idempotent-secrets").unwrap();
 
     let output = IdempotentSecrets::in_namespace(namespace.name())
-        .with_secret(r#"{"name":"secret-1", "type":"RandomString"}"#)
-        .set_owner(
-            r#"{"api_version":"v1", "kind":"ConfigMap", "name":"idempotent-secrets", "uid":"123"}"#,
-        )
+        .with_secret(json!({ "name": "secret-1", "type": "RandomString" }))
+        .set_owner(json!({
+            "api_version": "v1",
+            "kind": "ConfigMap",
+            "name": config_map["metadata"]["name"].as_str().unwrap(),
+            "uid": config_map["metadata"]["uid"].as_str().unwrap(),
+        }))
         .run()
         .unwrap();
     assert_no_errors(output);
