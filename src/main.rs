@@ -12,8 +12,8 @@ struct Args {
     namespace: String,
     #[arg(short, long, value_parser = parse_secret, action = ArgAction::Append)]
     json: Vec<Secret>,
-    #[arg(short, long, value_parser = parse_owner_reference)]
-    owner_reference: Option<OwnerReference>,
+    #[arg(short, long)]
+    anchor_name: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -37,25 +37,10 @@ fn parse_secret(raw: &str) -> Result<Secret, Box<dyn std::error::Error + Send + 
     Ok(secret)
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct OwnerReference {
-    api_version: String,
-    kind: String,
-    name: String,
-    uid: String,
-}
-
-fn parse_owner_reference(
-    raw: &str,
-) -> Result<OwnerReference, Box<dyn std::error::Error + Send + Sync + 'static>> {
-    let owner_reference: OwnerReference = serde_json::from_str(raw)?;
-    Ok(owner_reference)
-}
-
 async fn handle_secret(
     secret: &Secret,
     namespace: &str,
-    owner_reference: Option<&OwnerReference>,
+    owner_reference: Option<&k8s::OwnerReference>,
 ) -> Result<(), anyhow::Error> {
     match &secret {
         Secret::RsaKeypair { name } => {
@@ -86,6 +71,14 @@ async fn handle_secret(
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
+    let owner_reference = match args.anchor_name {
+        Some(name) => Some(
+            k8s::owner_reference(&args.namespace, &name)
+                .await
+                .expect("Failed to get owner reference"),
+        ),
+        None => None,
+    };
     for secret in args.json {
         if k8s::get_secret(&args.namespace, secret.name())
             .await
@@ -94,7 +87,7 @@ async fn main() {
             println!("Secret {} already exists, skipping", secret.name());
             continue;
         }
-        let result = handle_secret(&secret, &args.namespace, args.owner_reference.as_ref()).await;
+        let result = handle_secret(&secret, &args.namespace, owner_reference.as_ref()).await;
         if let Err(e) = result {
             eprintln!("Error creating secret {secret:?}: {e}");
         }

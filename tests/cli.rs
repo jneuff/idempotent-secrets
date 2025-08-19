@@ -8,7 +8,7 @@ use serde_json::{Value, json};
 struct IdempotentSecrets {
     secrets: Vec<String>,
     namespace: String,
-    owner_reference: Option<String>,
+    anchor_name: Option<String>,
 }
 
 impl IdempotentSecrets {
@@ -16,7 +16,7 @@ impl IdempotentSecrets {
         Self {
             secrets: vec![],
             namespace: namespace.to_string(),
-            owner_reference: None,
+            anchor_name: None,
         }
     }
 
@@ -25,8 +25,8 @@ impl IdempotentSecrets {
         self
     }
 
-    fn set_owner(mut self, owner_reference: impl Serialize) -> Self {
-        self.owner_reference = Some(serde_json::to_string(&owner_reference).unwrap());
+    fn set_anchor(mut self, anchor_name: impl Into<String>) -> Self {
+        self.anchor_name = Some(anchor_name.into());
         self
     }
 
@@ -41,21 +41,24 @@ impl IdempotentSecrets {
             args.push("--json");
             args.push(secret);
         }
-        if let Some(ref owner_reference) = self.owner_reference {
-            args.push("--owner-reference");
-            args.push(owner_reference);
+        if let Some(ref anchor_name) = self.anchor_name {
+            args.push("--anchor-name");
+            args.push(anchor_name);
         }
         Command::new("cargo").args(&args).output()
     }
 }
 
 fn assert_no_errors(output: Output) {
-    assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output.status.success(),
+        "stdout: {stdout}\nstderr: {stderr}"
+    );
     assert!(
         !stderr.contains("Error creating secret"),
-        "stderr: {}",
-        stderr
+        "stdout: {stdout}\nstderr: {stderr}"
     );
 }
 
@@ -81,16 +84,23 @@ fn is_idempotent() {
     assert_eq!(secret_1, secret_2);
 }
 
-fn kubectl_create_config_map(namespace: &str, name: &str) -> Result<Value, anyhow::Error> {
+fn kubectl_create_secret(namespace: &str, name: &str) -> Result<Value, anyhow::Error> {
     Command::new("kubectl")
-        .args(["create", "configmap", name, "--namespace", namespace])
+        .args([
+            "create",
+            "secret",
+            "generic",
+            name,
+            "--namespace",
+            namespace,
+        ])
         .status()
         .unwrap();
 
     let output = Command::new("kubectl")
-        .args(["get", "configmap", name, "-n", namespace, "-ojson"])
+        .args(["get", "secret", name, "-n", namespace, "-ojson"])
         .output()
-        .expect("Failed to execute kubectl get configmap command");
+        .expect("Failed to execute kubectl get secret command");
 
     if !output.status.success() {
         return Err(anyhow::anyhow!(
@@ -106,16 +116,12 @@ fn kubectl_create_config_map(namespace: &str, name: &str) -> Result<Value, anyho
 #[test]
 fn sets_owner_reference() {
     let namespace = given_a_namespace!();
-    let config_map = kubectl_create_config_map(namespace.name(), "idempotent-secrets").unwrap();
+    let anchor_secret =
+        kubectl_create_secret(namespace.name(), "idempotent-secrets-anchor").unwrap();
 
     let output = IdempotentSecrets::in_namespace(namespace.name())
         .with_secret(json!({ "name": "secret-1", "type": "RandomString" }))
-        .set_owner(json!({
-            "api_version": "v1",
-            "kind": "ConfigMap",
-            "name": config_map["metadata"]["name"].as_str().unwrap(),
-            "uid": config_map["metadata"]["uid"].as_str().unwrap(),
-        }))
+        .set_anchor(anchor_secret["metadata"]["name"].as_str().unwrap())
         .run()
         .unwrap();
     assert_no_errors(output);
@@ -126,7 +132,7 @@ fn sets_owner_reference() {
     assert_eq!(owner_references.len(), 1);
     assert_eq!(
         owner_references[0]["name"].as_str().unwrap(),
-        "idempotent-secrets"
+        "idempotent-secrets-anchor"
     );
-    assert_eq!(owner_references[0]["kind"].as_str().unwrap(), "ConfigMap");
+    assert_eq!(owner_references[0]["kind"].as_str().unwrap(), "Secret");
 }

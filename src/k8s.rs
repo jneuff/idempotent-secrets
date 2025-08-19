@@ -1,25 +1,13 @@
 use std::collections::BTreeMap;
 
 pub use k8s_openapi::ByteString;
-use k8s_openapi::{
-    api::core::v1::Secret, apimachinery::pkg::apis::meta::v1::OwnerReference as KubeOwnerReference,
-};
+use k8s_openapi::api::core::v1::Secret;
 use kube::{
     Api, Client,
     api::{ObjectMeta, PostParams},
 };
 
-use crate::OwnerReference;
-
-fn to_kube_owner_reference(owner_reference: &OwnerReference) -> KubeOwnerReference {
-    KubeOwnerReference {
-        api_version: owner_reference.api_version.clone(),
-        kind: owner_reference.kind.clone(),
-        name: owner_reference.name.clone(),
-        uid: owner_reference.uid.clone(),
-        ..Default::default()
-    }
-}
+pub use k8s_openapi::apimachinery::pkg::apis::meta::v1::OwnerReference;
 
 fn secret(
     name: &str,
@@ -29,12 +17,28 @@ fn secret(
     Secret {
         metadata: ObjectMeta {
             name: Some(name.to_string()),
-            owner_references: owner_reference.map(|owner| vec![to_kube_owner_reference(owner)]),
+            owner_references: owner_reference.map(|owner| vec![owner.clone()]),
             ..Default::default()
         },
         data,
         ..Default::default()
     }
+}
+
+pub async fn owner_reference(
+    namespace: &str,
+    anchor_name: &str,
+) -> Result<OwnerReference, anyhow::Error> {
+    let secret = get_secret(namespace, anchor_name)
+        .await
+        .ok_or(anyhow::anyhow!("Anchor secret {} not found", anchor_name))?;
+    Ok(OwnerReference {
+        api_version: "v1".to_string(),
+        kind: "Secret".to_string(),
+        name: secret.metadata.name.clone().unwrap(),
+        uid: secret.metadata.uid.clone().unwrap(),
+        ..Default::default()
+    })
 }
 
 pub async fn get_secret(namespace: &str, name: &str) -> Option<Secret> {
@@ -136,6 +140,7 @@ mod test {
             kind: "ConfigMap".to_string(),
             name: config_map.metadata.name.unwrap(),
             uid: config_map.metadata.uid.unwrap(),
+            ..Default::default()
         };
 
         create_secret(
