@@ -136,3 +136,30 @@ fn sets_owner_reference() {
     );
     assert_eq!(owner_references[0]["kind"].as_str().unwrap(), "Secret");
 }
+
+#[should_panic]
+#[test]
+fn deletes_secrets_when_config_changes() {
+    let namespace = given_a_namespace!();
+
+    let output = IdempotentSecrets::in_namespace(namespace.name())
+        .with_secret(json!({ "name": "secret-1", "type": "RandomString" }))
+        .with_secret(json!({ "name": "secret-2", "type": "RandomString" }))
+        .run()
+        .unwrap();
+    assert_no_errors(output);
+    let secret_1 = kubectl_get_secret(namespace.name(), "secret-1").unwrap();
+    assert_eq!(secret_1["metadata"]["name"].as_str().unwrap(), "secret-1");
+    let secret_2 = kubectl_get_secret(namespace.name(), "secret-2").unwrap();
+    assert_eq!(secret_2["metadata"]["name"].as_str().unwrap(), "secret-2");
+
+    let output = IdempotentSecrets::in_namespace(namespace.name())
+        .with_secret(json!({ "name": "secret-2", "type": "RandomString" }))
+        .run()
+        .unwrap();
+    assert_no_errors(output);
+
+    let secret_2 = kubectl_get_secret(namespace.name(), "secret-2").unwrap();
+    assert_eq!(secret_2["metadata"]["name"].as_str().unwrap(), "secret-2");
+    assert!(kubectl_get_secret(namespace.name(), "secret-1").is_err());
+}
