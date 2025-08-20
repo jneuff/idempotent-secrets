@@ -328,7 +328,6 @@ fn helm_uninstall(namespace: &str, release_name: &str) -> Result<ExitStatus, any
         .map_err(|e| anyhow::anyhow!("Failed to execute helm uninstall command: {}", e))
 }
 
-#[should_panic]
 #[test]
 fn deletes_secrets_when_uninstalled() {
     let namespace = given_a_namespace!();

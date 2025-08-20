@@ -18,6 +18,8 @@ spec:
             - --json
             - {{ $secret | toJson | quote }}
 {{- end }}
+            - --anchor-name
+            - {{ include "idempotent-secrets.fullname" $ }}-anchor
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -28,6 +30,15 @@ spec:
             runAsGroup: 10001
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            # We mount the anchor secret to ensure that it is created before the job runs.
+            - name: anchor-secret
+              mountPath: /anchor-secret
+              readOnly: true
+      volumes:
+        - name: anchor-secret
+          secret:
+            secretName: {{ include "idempotent-secrets.fullname" $ }}-anchor
       restartPolicy: Never
       serviceAccountName: {{ include "idempotent-secrets.fullname" $ }}
 ---
