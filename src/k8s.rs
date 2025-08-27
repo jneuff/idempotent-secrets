@@ -27,6 +27,10 @@ fn secret(
     }
 }
 
+pub fn labels_from_owner_reference(owner_reference: &OwnerReference) -> BTreeMap<String, String> {
+    [("owner".to_string(), owner_reference.name.clone())].into()
+}
+
 pub async fn owner_reference(
     namespace: &str,
     anchor_name: &str,
