@@ -52,20 +52,18 @@ pub async fn create_secret(
     name: &str,
     data: Option<BTreeMap<String, ByteString>>,
     owner_reference: Option<&OwnerReference>,
-) -> Result<(), kube::Error> {
+) -> Result<Secret, kube::Error> {
     let client = Client::try_default().await.unwrap();
     let secrets: Api<Secret> = Api::namespaced(client, namespace);
     let new_secret = secret(name, data, owner_reference);
-    secrets
-        .create(&PostParams::default(), &new_secret)
-        .await
-        .map(|_| ())
+    secrets.create(&PostParams::default(), &new_secret).await
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use k8s_openapi::api::core::v1::{ConfigMap, Namespace};
+    use k8s_openapi::api::core::v1::Namespace;
+    use kube::api::ListParams;
 
     async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
         let namespaces: Api<Namespace> = Api::all(client.clone());
@@ -106,40 +104,19 @@ mod test {
         assert_eq!(actual, expected)
     }
 
-    async fn create_configmap(
-        client: &Client,
-        namespace: &str,
-        name: &str,
-    ) -> Result<ConfigMap, kube::Error> {
-        let configmaps: Api<ConfigMap> = Api::namespaced(client.clone(), namespace);
-        configmaps
-            .create(
-                &PostParams::default(),
-                &ConfigMap {
-                    metadata: ObjectMeta {
-                        name: Some(name.to_string()),
-                        ..Default::default()
-                    },
-                    data: None,
-                    ..Default::default()
-                },
-            )
-            .await
-    }
-
     #[tokio::test]
     async fn sets_owner_reference() {
         let client = Client::try_default().await.unwrap();
-        let namespace = "test-5";
+        let namespace = "test-sets-owner-reference";
         create_namespace(&client, namespace).await.unwrap();
-        let config_map = create_configmap(&client, namespace, "idempotent-secrets")
+        let secret = create_secret(namespace, "idempotent-secrets", None, None)
             .await
             .unwrap();
         let owner_reference = OwnerReference {
             api_version: "v1".to_string(),
-            kind: "ConfigMap".to_string(),
-            name: config_map.metadata.name.unwrap(),
-            uid: config_map.metadata.uid.unwrap(),
+            kind: "Secret".to_string(),
+            name: secret.metadata.name.unwrap(),
+            uid: secret.metadata.uid.unwrap(),
             ..Default::default()
         };
 
@@ -161,6 +138,35 @@ mod test {
 
         assert_eq!(owner_references.len(), 1);
         assert_eq!(owner_references[0].name, "idempotent-secrets");
-        assert_eq!(owner_references[0].kind, "ConfigMap");
+        assert_eq!(owner_references[0].kind, "Secret");
+    }
+
+    #[tokio::test]
+    async fn lists_secrets() {
+        let client = Client::try_default().await.unwrap();
+        let namespace = "test-gets-all-1";
+        create_namespace(&client, namespace).await.unwrap();
+        create_secret(namespace, "secret-1", None, None)
+            .await
+            .unwrap();
+        create_secret(namespace, "secret-2", None, None)
+            .await
+            .unwrap();
+
+        let mut secrets = list_secrets(namespace).await.unwrap();
+        secrets.sort();
+
+        assert_eq!(secrets, ["secret-1", "secret-2"])
+    }
+
+    pub async fn list_secrets(namespace: &str) -> Result<Vec<String>, kube::Error> {
+        let client = Client::try_default().await.unwrap();
+        let secrets: Api<Secret> = Api::namespaced(client, namespace);
+        Ok(secrets
+            .list_metadata(&ListParams::default())
+            .await?
+            .into_iter()
+            .filter_map(|s| s.metadata.name)
+            .collect())
     }
 }

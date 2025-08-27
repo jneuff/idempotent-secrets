@@ -55,14 +55,14 @@ async fn handle_secret(
                     k8s::ByteString(private_key.into_bytes()),
                 ),
             ]);
-            k8s::create_secret(namespace, name, Some(data), owner_reference).await?
+            let _ = k8s::create_secret(namespace, name, Some(data), owner_reference).await?;
         }
         Secret::RandomString { name } => {
             let data = BTreeMap::from([(
                 "value".to_owned(),
                 k8s::ByteString(random_string::generate_random_string()?.into_bytes()),
             )]);
-            k8s::create_secret(namespace, name, Some(data), owner_reference).await?
+            let _ = k8s::create_secret(namespace, name, Some(data), owner_reference).await?;
         }
     }
     Ok(())
