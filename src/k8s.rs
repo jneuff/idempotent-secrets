@@ -66,6 +66,7 @@ pub async fn create_secret(
 mod test {
     use super::*;
     use k8s_openapi::api::core::v1::{ConfigMap, Namespace};
+    use kube::api::ListParams;
 
     async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
         let namespaces: Api<Namespace> = Api::all(client.clone());
@@ -162,5 +163,34 @@ mod test {
         assert_eq!(owner_references.len(), 1);
         assert_eq!(owner_references[0].name, "idempotent-secrets");
         assert_eq!(owner_references[0].kind, "ConfigMap");
+    }
+
+    #[tokio::test]
+    async fn lists_secrets() {
+        let client = Client::try_default().await.unwrap();
+        let namespace = "test-gets-all-1";
+        create_namespace(&client, namespace).await.unwrap();
+        create_secret(namespace, "secret-1", None, None)
+            .await
+            .unwrap();
+        create_secret(namespace, "secret-2", None, None)
+            .await
+            .unwrap();
+
+        let mut secrets = list_secrets(namespace).await.unwrap();
+        secrets.sort();
+
+        assert_eq!(secrets, ["secret-1", "secret-2"])
+    }
+
+    pub async fn list_secrets(namespace: &str) -> Result<Vec<String>, kube::Error> {
+        let client = Client::try_default().await.unwrap();
+        let secrets: Api<Secret> = Api::namespaced(client, namespace);
+        Ok(secrets
+            .list_metadata(&ListParams::default())
+            .await?
+            .into_iter()
+            .filter_map(|s| s.metadata.name)
+            .collect())
     }
 }
