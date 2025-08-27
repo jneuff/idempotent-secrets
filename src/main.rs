@@ -42,6 +42,7 @@ async fn handle_secret(
     namespace: &str,
     owner_reference: Option<&k8s::OwnerReference>,
 ) -> Result<(), anyhow::Error> {
+    let labels = owner_reference.map(k8s::labels_from_owner_reference);
     match &secret {
         Secret::RsaKeypair { name } => {
             let (private_key, public_key) = keypair::generate_keypair_pem().unwrap();
@@ -55,14 +56,16 @@ async fn handle_secret(
                     k8s::ByteString(private_key.into_bytes()),
                 ),
             ]);
-            let _ = k8s::create_secret(namespace, name, Some(data), owner_reference).await?;
+            let _ =
+                k8s::create_secret(namespace, name, Some(data), owner_reference, labels).await?;
         }
         Secret::RandomString { name } => {
             let data = BTreeMap::from([(
                 "value".to_owned(),
                 k8s::ByteString(random_string::generate_random_string()?.into_bytes()),
             )]);
-            let _ = k8s::create_secret(namespace, name, Some(data), owner_reference).await?;
+            let _ =
+                k8s::create_secret(namespace, name, Some(data), owner_reference, labels).await?;
         }
     }
     Ok(())
