@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.2](https://github.com/jneuff/idempotent-secrets/compare/v0.4.1...v0.4.2) (2025-08-27)
+
+
+### Dependencies
+
+* update image tag to sha-183f41fde5833c6ca67700c358b55421700f3b05 ([#149](https://github.com/jneuff/idempotent-secrets/issues/149)) ([76f4d96](https://github.com/jneuff/idempotent-secrets/commit/76f4d96863f686dce97c66abd01204c116f709c3))
+* update image tag to sha-18c41c2836dc2ecfe0880ca21107e71d829cb322 ([#152](https://github.com/jneuff/idempotent-secrets/issues/152)) ([42b6a9b](https://github.com/jneuff/idempotent-secrets/commit/42b6a9ba22cb0f566f70e5ccd6f45be9d84289f3))
+
 ## [0.4.1](https://github.com/jneuff/idempotent-secrets/compare/v0.4.0...v0.4.1) (2025-08-27)
 
 
