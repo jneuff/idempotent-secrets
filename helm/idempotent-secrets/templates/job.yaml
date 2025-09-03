@@ -1,7 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "idempotent-secrets.fullname" $ }}
+  # As kubernetes does not allow updating the job spec, the job needs to be recreated upon any
+  # secret configuration changes. We force this by appending the sha1sum of the configuration to
+  # the name.
+  name: {{ include "idempotent-secrets.fullname" $ }}-{{ toString $.Values.secrets | sha1sum }}
 spec:
   backoffLimit: 0
   template:

@@ -71,6 +71,26 @@ async fn handle_secret(
     Ok(())
 }
 
+async fn cleanup_secrets(
+    namespace: &str,
+    owner_reference: &k8s::OwnerReference,
+    configured_secrets: &[Secret],
+) {
+    let configured_secrets_names: Vec<&str> = configured_secrets.iter().map(|s| s.name()).collect();
+    let all_secrets = k8s::list_owned_secrets(namespace, &owner_reference.name)
+        .await
+        .unwrap();
+    let to_delete = all_secrets
+        .iter()
+        .filter(|s| !configured_secrets_names.contains(&s.as_str()));
+    for secret in to_delete {
+        println!("Deleting {secret} as it is not configured.");
+        let _ = k8s::delete_secret(namespace, secret).await.map_err(|e| {
+            eprintln!("Failed to delete secret {secret}: {e}");
+        });
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
@@ -82,6 +102,9 @@ async fn main() {
         ),
         None => None,
     };
+    if let Some(ref owner) = owner_reference {
+        cleanup_secrets(&args.namespace, owner, &args.json).await;
+    }
     for secret in args.json {
         if k8s::get_secret(&args.namespace, secret.name())
             .await
