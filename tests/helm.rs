@@ -353,3 +353,51 @@ fn deletes_secrets_when_uninstalled() {
     let result = kubectl_get_secret(namespace.name(), secret_name);
     assert!(result.is_err(), "Secret should not exist");
 }
+
+#[test]
+fn cleans_up_unconfigured_secrets() {
+    let namespace = given_a_namespace!();
+    let secret_names = ["secret-1", "secret-2"];
+
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .with_secret(json!({
+            "name": secret_names[0],
+            "type": "RsaKeypair",
+        }))
+        .with_secret(json!({
+            "name": secret_names[1],
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
+    assert!(status.success(), "Failed to install Helm chart");
+    let secret = kubectl_get_secret(namespace.name(), secret_names[0]).unwrap();
+    assert_eq!(
+        secret["metadata"]["name"].as_str().unwrap(),
+        secret_names[0]
+    );
+    let secret = kubectl_get_secret(namespace.name(), secret_names[1]).unwrap();
+    assert_eq!(
+        secret["metadata"]["name"].as_str().unwrap(),
+        secret_names[1]
+    );
+
+    let status = HelmUpgrade::in_namespace(namespace.name())
+        .with_secret(json!({
+            "name": secret_names[0],
+            "type": "RsaKeypair",
+        }))
+        .run()
+        .unwrap();
+    assert!(
+        status.success(),
+        "Failed to install Helm chart a second time"
+    );
+    let secret = kubectl_get_secret(namespace.name(), secret_names[0]).unwrap();
+    assert_eq!(
+        secret["metadata"]["name"].as_str().unwrap(),
+        secret_names[0]
+    );
+
+    assert!(kubectl_get_secret(namespace.name(), secret_names[1]).is_err())
+}
