@@ -4,11 +4,31 @@ pub use k8s_openapi::ByteString;
 use k8s_openapi::api::core::v1::Secret;
 use kube::{
     Api, Client,
-    api::{ObjectMeta, PostParams},
+    api::{DeleteParams, ListParams, ObjectMeta, PostParams},
 };
 
 pub use k8s_openapi::apimachinery::pkg::apis::meta::v1::OwnerReference;
 
+pub async fn delete_secret(namespace: &str, name: &str) -> Result<(), kube::Error> {
+    let client = Client::try_default().await.unwrap();
+    let secrets: Api<Secret> = Api::namespaced(client, namespace);
+    secrets
+        .delete(name, &DeleteParams::default())
+        .await
+        .map(|_| ())
+}
+
+pub async fn list_owned_secrets(namespace: &str, owner: &str) -> Result<Vec<String>, kube::Error> {
+    let client = Client::try_default().await.unwrap();
+    let secrets: Api<Secret> = Api::namespaced(client, namespace);
+    let label_selector = format!("owner={owner}");
+    Ok(secrets
+        .list_metadata(&ListParams::default().labels(&label_selector))
+        .await?
+        .into_iter()
+        .filter_map(|s| s.metadata.name)
+        .collect())
+}
 fn secret(
     name: &str,
     data: Option<BTreeMap<String, ByteString>>,
@@ -70,7 +90,6 @@ pub async fn create_secret(
 mod test {
     use super::*;
     use k8s_openapi::api::core::v1::Namespace;
-    use kube::api::ListParams;
 
     async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
         let namespaces: Api<Namespace> = Api::all(client.clone());
@@ -173,18 +192,18 @@ mod test {
         assert_eq!(secrets, ["secret-1"])
     }
 
-    pub async fn list_owned_secrets(
-        namespace: &str,
-        owner: &str,
-    ) -> Result<Vec<String>, kube::Error> {
+    #[tokio::test]
+    async fn deletes_secret() {
         let client = Client::try_default().await.unwrap();
-        let secrets: Api<Secret> = Api::namespaced(client, namespace);
-        let label_selector = format!("owner={owner}");
-        Ok(secrets
-            .list_metadata(&ListParams::default().labels(&label_selector))
-            .await?
-            .into_iter()
-            .filter_map(|s| s.metadata.name)
-            .collect())
+        let namespace = "test-delete-3";
+        create_namespace(&client, namespace).await.unwrap();
+        create_secret(namespace, "secret-1", None, None, None)
+            .await
+            .unwrap();
+
+        delete_secret(namespace, "secret-1").await.unwrap();
+
+        let result = get_secret(namespace, "secret-1").await;
+        assert!(result.is_none())
     }
 }

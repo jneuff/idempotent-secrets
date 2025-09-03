@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "idempotent-secrets.fullname" $ }}
+  name: {{ include "idempotent-secrets.fullname" $ }}-{{ toString $.Values.secrets | sha1sum }}
 spec:
   backoffLimit: 0
   template:
