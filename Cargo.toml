@@ -1,3 +1,6 @@
+[workspace]
+members = ["k8s-test-utils"]
+
 [package]
 name = "idempotent-secrets"
 # We track the version exclusively via the Helm chart
@@ -20,6 +23,7 @@ tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"] }
 lazy_static = "1.4.0"
 stdext = "0.3.3"
 tokio = { version = "1.47.1", features = ["test-util", "tokio-macros"] }
+k8s-test-utils = { path = "k8s-test-utils" }
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 3

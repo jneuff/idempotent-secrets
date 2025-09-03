@@ -1,9 +1,9 @@
-mod helpers;
 use std::process::{Command, Output};
 
-use helpers::*;
 use serde::Serialize;
 use serde_json::{Value, json};
+
+use k8s_test_utils::{given_a_namespace, kubectl_get_secret, namespace};
 
 struct IdempotentSecrets {
     secrets: Vec<String>,
@@ -31,11 +31,6 @@ impl IdempotentSecrets {
     }
 
     fn run(self) -> Result<Output, std::io::Error> {
-        dbg!(
-            "running in namespace {} in cluster {}",
-            &self.namespace,
-            CLUSTER.name()
-        );
         let mut args = vec!["run", "--", "--namespace", &self.namespace];
         for secret in &self.secrets {
             args.push("--json");

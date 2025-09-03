@@ -621,6 +621,7 @@ dependencies = [
  "base64 0.22.1",
  "clap",
  "k8s-openapi",
+ "k8s-test-utils",
  "kube",
  "lazy_static",
  "rand",
@@ -686,6 +687,16 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "k8s-test-utils"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "kube",
+ "lazy_static",
  "serde_json",
 ]
 
