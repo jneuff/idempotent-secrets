@@ -89,24 +89,7 @@ pub async fn create_secret(
 #[cfg(test)]
 mod test {
     use super::*;
-    use k8s_openapi::api::core::v1::Namespace;
     use k8s_test_utils::given_a_namespace;
-
-    async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
-        let namespaces: Api<Namespace> = Api::all(client.clone());
-        namespaces
-            .create(
-                &PostParams::default(),
-                &Namespace {
-                    metadata: ObjectMeta {
-                        name: Some(name.to_string()),
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                },
-            )
-            .await
-    }
 
     fn any_secret_data() -> BTreeMap<String, ByteString> {
         BTreeMap::from([("foo".to_string(), ByteString("bar".into()))])
