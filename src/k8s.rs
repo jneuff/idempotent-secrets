@@ -90,6 +90,7 @@ pub async fn create_secret(
 mod test {
     use super::*;
     use k8s_openapi::api::core::v1::Namespace;
+    use k8s_test_utils::given_a_namespace;
 
     async fn create_namespace(client: &Client, name: &str) -> Result<Namespace, kube::Error> {
         let namespaces: Api<Namespace> = Api::all(client.clone());
@@ -113,15 +114,20 @@ mod test {
 
     #[tokio::test]
     async fn should_create_and_get_secret() {
-        let client = Client::try_default().await.unwrap();
-        create_namespace(&client, "test-1").await.unwrap();
+        let namespace = given_a_namespace!();
         let expected = any_secret_data();
 
-        create_secret("test-1", "secret-1", Some(expected.clone()), None, None)
-            .await
-            .unwrap();
+        create_secret(
+            namespace.name(),
+            "secret-1",
+            Some(expected.clone()),
+            None,
+            None,
+        )
+        .await
+        .unwrap();
 
-        let actual = get_secret("test-1", "secret-1")
+        let actual = get_secret(namespace.name(), "secret-1")
             .await
             .unwrap()
             .data
@@ -132,10 +138,8 @@ mod test {
 
     #[tokio::test]
     async fn sets_owner_reference() {
-        let client = Client::try_default().await.unwrap();
-        let namespace = "test-sets-owner-reference";
-        create_namespace(&client, namespace).await.unwrap();
-        let secret = create_secret(namespace, "idempotent-secrets", None, None, None)
+        let namespace = given_a_namespace!();
+        let secret = create_secret(namespace.name(), "idempotent-secrets", None, None, None)
             .await
             .unwrap();
         let owner_reference = OwnerReference {
@@ -147,7 +151,7 @@ mod test {
         };
 
         create_secret(
-            namespace,
+            namespace.name(),
             "secret-2",
             Some(any_secret_data()),
             Some(&owner_reference),
@@ -156,7 +160,7 @@ mod test {
         .await
         .unwrap();
 
-        let owner_references = get_secret(namespace, "secret-2")
+        let owner_references = get_secret(namespace.name(), "secret-2")
             .await
             .unwrap()
             .metadata
@@ -170,11 +174,9 @@ mod test {
 
     #[tokio::test]
     async fn lists_only_owned_secrets() {
-        let client = Client::try_default().await.unwrap();
-        let namespace = "test-list";
-        create_namespace(&client, namespace).await.unwrap();
+        let namespace = given_a_namespace!();
         create_secret(
-            namespace,
+            namespace.name(),
             "secret-1",
             None,
             None,
@@ -182,11 +184,11 @@ mod test {
         )
         .await
         .unwrap();
-        create_secret(namespace, "secret-2", None, None, None)
+        create_secret(namespace.name(), "secret-2", None, None, None)
             .await
             .unwrap();
 
-        let mut secrets = list_owned_secrets(namespace, "foo").await.unwrap();
+        let mut secrets = list_owned_secrets(namespace.name(), "foo").await.unwrap();
         secrets.sort();
 
         assert_eq!(secrets, ["secret-1"])
@@ -194,16 +196,14 @@ mod test {
 
     #[tokio::test]
     async fn deletes_secret() {
-        let client = Client::try_default().await.unwrap();
-        let namespace = "test-delete-3";
-        create_namespace(&client, namespace).await.unwrap();
-        create_secret(namespace, "secret-1", None, None, None)
+        let namespace = given_a_namespace!();
+        create_secret(namespace.name(), "secret-1", None, None, None)
             .await
             .unwrap();
 
-        delete_secret(namespace, "secret-1").await.unwrap();
+        delete_secret(namespace.name(), "secret-1").await.unwrap();
 
-        let result = get_secret(namespace, "secret-1").await;
+        let result = get_secret(namespace.name(), "secret-1").await;
         assert!(result.is_none())
     }
 }
