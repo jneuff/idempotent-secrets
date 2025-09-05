@@ -1,9 +1,7 @@
 use lazy_static::lazy_static;
 use std::process::{Command, ExitStatus};
 
-mod helpers;
-
-use helpers::*;
+use k8s_test_utils::{CLUSTER, given_a_namespace, kubectl_get_secret, namespace};
 use serde_json::{Value, json};
 
 const HELM_COMMAND_TIMEOUT: &str = "60s";
