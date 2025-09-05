@@ -2,6 +2,7 @@ ARG RUNTIME_ROOT=/runtime-root
 
 FROM rust:latest AS app_builder
 WORKDIR /app
+COPY k8s-test-utils /app/k8s-test-utils
 COPY src /app/src
 COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
