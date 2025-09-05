@@ -3,7 +3,7 @@ use std::process::{Command, Output};
 use serde::Serialize;
 use serde_json::{Value, json};
 
-use k8s_test_utils::{given_a_namespace, kubectl_get_secret, namespace};
+use k8s_test_utils::{given_a_namespace, kubectl_get_secret};
 
 struct IdempotentSecrets {
     secrets: Vec<String>,

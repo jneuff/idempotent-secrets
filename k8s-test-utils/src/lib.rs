@@ -95,9 +95,11 @@ pub fn namespace(name: &str) -> TestNamespace {
 #[macro_export]
 macro_rules! given_a_namespace {
     () => {{
+        use k8s_test_utils::namespace;
         let test_name = stdext::function_name!()
-            .split("::")
-            .skip(1)
+            .rsplit("::")
+            // async tests get wrapped in a closure
+            .skip_while(|p| *p == "{{closure}}")
             .next()
             .unwrap()
             .replace("_", "-")
