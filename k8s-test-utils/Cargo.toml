@@ -5,6 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow = "^1.0.99"
-kube = "^1.1.0"
+kube = "^2.0.0"
 lazy_static = "^1.4.0"
 serde_json = "^1.0.143"
