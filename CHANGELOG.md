@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.2](https://github.com/jneuff/idempotent-secrets/compare/v0.5.1...v0.5.2) (2025-09-12)
+
+
+### Dependencies
+
+* bump the kube group with 2 updates ([#166](https://github.com/jneuff/idempotent-secrets/issues/166)) ([677b144](https://github.com/jneuff/idempotent-secrets/commit/677b144cf5488aedd6aa19539504121264e47dcf))
+* update image tag to sha-677b144cf5488aedd6aa19539504121264e47dcf ([#167](https://github.com/jneuff/idempotent-secrets/issues/167)) ([0996ddb](https://github.com/jneuff/idempotent-secrets/commit/0996ddb79417832a376abc6d53982e82707a3c1d))
+* update image tag to sha-caa929c290148b7a6b9da6f4c51560ebdaf24635 ([#164](https://github.com/jneuff/idempotent-secrets/issues/164)) ([829ae6e](https://github.com/jneuff/idempotent-secrets/commit/829ae6ec0fd4ae6cd0176547f8b7b19acc0e16cf))
+
 ## [0.5.1](https://github.com/jneuff/idempotent-secrets/compare/v0.5.0...v0.5.1) (2025-09-05)
 
 
