@@ -1,7 +1,7 @@
 image:
   repository: ghcr.io/jneuff/idempotent-secrets/images
   name: idempotent-secrets
-  tag: sha-3a876b41f04798f3114bc6f825a0275c135c91f6
+  tag: sha-4febd759b3389b1a27af32160bd204467c4bcc47
 
 secrets:
 #   - name: secret-1
