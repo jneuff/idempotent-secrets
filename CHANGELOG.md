@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.5](https://github.com/jneuff/idempotent-secrets/compare/v0.5.4...v0.5.5) (2025-11-18)
+
+
+### Dependencies
+
+* bump clap from 4.5.49 to 4.5.50 ([#189](https://github.com/jneuff/idempotent-secrets/issues/189)) ([0fe9ec1](https://github.com/jneuff/idempotent-secrets/commit/0fe9ec116aca1dfeac49ce18c1535047c19bc8d5))
+* bump clap from 4.5.50 to 4.5.52 ([#192](https://github.com/jneuff/idempotent-secrets/issues/192)) ([0f7b63c](https://github.com/jneuff/idempotent-secrets/commit/0f7b63cddae423ba83ccc21b3ab6080ac0a50c3b))
+* bump rsa from 0.9.8 to 0.9.9 ([#191](https://github.com/jneuff/idempotent-secrets/issues/191)) ([22b73af](https://github.com/jneuff/idempotent-secrets/commit/22b73aff74a9b51e128fc05b45f49b2264966786))
+* update image tag to sha-0f7b63cddae423ba83ccc21b3ab6080ac0a50c3b ([#196](https://github.com/jneuff/idempotent-secrets/issues/196)) ([77a0edb](https://github.com/jneuff/idempotent-secrets/commit/77a0edb405141150742ca103695796a68f15306a))
+* update image tag to sha-22b73aff74a9b51e128fc05b45f49b2264966786 ([#193](https://github.com/jneuff/idempotent-secrets/issues/193)) ([1174ed3](https://github.com/jneuff/idempotent-secrets/commit/1174ed3c9968db08250a2535768c91441e9a4455))
+* update image tag to sha-91ae6ce3bdc5ae4bf2062c61eb207c78190162ec ([#200](https://github.com/jneuff/idempotent-secrets/issues/200)) ([4e987de](https://github.com/jneuff/idempotent-secrets/commit/4e987de37a282b9b69be7eb84b782c6f66c9e599))
+
 ## [0.5.4](https://github.com/jneuff/idempotent-secrets/compare/v0.5.3...v0.5.4) (2025-10-15)
 
 
