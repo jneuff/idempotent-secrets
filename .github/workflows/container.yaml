@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - Containerfile
+      - Dockerfile
       - Cargo.toml
       - Cargo.lock
       - src/**
@@ -14,7 +14,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - Containerfile
+      - Dockerfile
       - Cargo.toml
       - Cargo.lock
       - src/**
@@ -135,7 +135,7 @@ jobs:
         with:
           context: .
           push: true
-          file: ./Containerfile
+          file: ./Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
