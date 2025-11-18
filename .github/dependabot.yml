@@ -13,3 +13,9 @@ updates:
         patterns:
           - "kube"
           - "k8s-openapi"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "deps"
