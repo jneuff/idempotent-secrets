@@ -8,7 +8,7 @@ COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
 RUN cargo build --release
 
-FROM ubuntu:24.04@sha256:4fdf0125919d24aec972544669dcd7d6a26a8ad7e6561c73d5549bd6db258ac2 AS os_builder
+FROM ubuntu:24.04@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54 AS os_builder
 ARG RUNTIME_ROOT
 RUN apt-get update && \
      apt-get upgrade -y && \
