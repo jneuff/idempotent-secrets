@@ -1,6 +1,6 @@
 ARG RUNTIME_ROOT=/runtime-root
 
-FROM rust:latest@sha256:55b11ee0bf0cf1dc71dc11a0b78d5fa658d7e46e08d2fdf170b1d8bfbbc96a6a AS app_builder
+FROM rust:latest@sha256:638747aac515b4b346c144d8f8debfc367e3a89ba62383df72a184c4b9e31313 AS app_builder
 WORKDIR /app
 COPY k8s-test-utils /app/k8s-test-utils
 COPY src /app/src
@@ -8,7 +8,7 @@ COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
 RUN cargo build --release
 
-FROM ubuntu:24.04@sha256:4fdf0125919d24aec972544669dcd7d6a26a8ad7e6561c73d5549bd6db258ac2 AS os_builder
+FROM ubuntu:24.04@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54 AS os_builder
 ARG RUNTIME_ROOT
 RUN apt-get update && \
      apt-get upgrade -y && \
