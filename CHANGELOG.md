@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.6](https://github.com/jneuff/idempotent-secrets/compare/v0.5.5...v0.5.6) (2025-11-20)
+
+
+### Dependencies
+
+* bump clap from 4.5.52 to 4.5.53 ([#206](https://github.com/jneuff/idempotent-secrets/issues/206)) ([041e916](https://github.com/jneuff/idempotent-secrets/commit/041e916d7e35b5d954de9217e16dcc7b4d4245ab))
+* bump rust from `55b11ee` to `638747a` ([#203](https://github.com/jneuff/idempotent-secrets/issues/203)) ([a8c0f32](https://github.com/jneuff/idempotent-secrets/commit/a8c0f32dc50d88ace3ed04f501f5529112a65078))
+* bump ubuntu from `4fdf012` to `c35e29c` ([#202](https://github.com/jneuff/idempotent-secrets/issues/202)) ([5032e1a](https://github.com/jneuff/idempotent-secrets/commit/5032e1a1925eb1a2ebc1c698bc8fd12c8f9991cd))
+* update image tag to sha-041e916d7e35b5d954de9217e16dcc7b4d4245ab ([#209](https://github.com/jneuff/idempotent-secrets/issues/209)) ([943d526](https://github.com/jneuff/idempotent-secrets/commit/943d52608f8edb8a1296216746299a48c6ea4d3c))
+* update image tag to sha-5032e1a1925eb1a2ebc1c698bc8fd12c8f9991cd ([#208](https://github.com/jneuff/idempotent-secrets/issues/208)) ([8166aea](https://github.com/jneuff/idempotent-secrets/commit/8166aea5662be3483d6cbd04d4cb4644b069aadd))
+* update image tag to sha-a8c0f32dc50d88ace3ed04f501f5529112a65078 ([#207](https://github.com/jneuff/idempotent-secrets/issues/207)) ([59ddfa6](https://github.com/jneuff/idempotent-secrets/commit/59ddfa68efa3107cdb408b4654d6393776d51098))
+* update image tag to sha-c00a3429db1300878a4cbd61a2f5574e353ee3d9 ([#204](https://github.com/jneuff/idempotent-secrets/issues/204)) ([16bba43](https://github.com/jneuff/idempotent-secrets/commit/16bba4347089c1422ca2bd0409b63c2449b6038a))
+
 ## [0.5.5](https://github.com/jneuff/idempotent-secrets/compare/v0.5.4...v0.5.5) (2025-11-18)
 
 
