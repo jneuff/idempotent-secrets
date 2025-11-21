@@ -1,6 +1,6 @@
 ARG RUNTIME_ROOT=/runtime-root
 
-FROM rust:latest@sha256:638747aac515b4b346c144d8f8debfc367e3a89ba62383df72a184c4b9e31313 AS app_builder
+FROM rust:latest@sha256:ad8c72c693b517ed60c930839daed91a5696fa6118f031d888cd0b7055a921a3 AS app_builder
 WORKDIR /app
 COPY k8s-test-utils /app/k8s-test-utils
 COPY src /app/src
