@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.7](https://github.com/jneuff/idempotent-secrets/compare/v0.5.6...v0.5.7) (2025-12-05)
+
+
+### Dependencies
+
+* bump rust from `638747a` to `ad8c72c` ([#210](https://github.com/jneuff/idempotent-secrets/issues/210)) ([ae29cbf](https://github.com/jneuff/idempotent-secrets/commit/ae29cbfb616d85226a8a0d3b4e8285d248a12524))
+* update image tag to sha-ae29cbfb616d85226a8a0d3b4e8285d248a12524 ([#212](https://github.com/jneuff/idempotent-secrets/issues/212)) ([86e4a09](https://github.com/jneuff/idempotent-secrets/commit/86e4a09bda16bd30b1e13342d30790676bc08def))
+
 ## [0.5.6](https://github.com/jneuff/idempotent-secrets/compare/v0.5.5...v0.5.6) (2025-11-20)
 
 
