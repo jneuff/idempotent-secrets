@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.7](https://github.com/jneuff/idempotent-secrets/compare/v0.5.6...v0.5.7) (2025-12-11)
+
+
+### Dependencies
+
+* bump k8s-openapi from 0.26.0 to 0.26.1 in the kube group ([#215](https://github.com/jneuff/idempotent-secrets/issues/215)) ([a680d7e](https://github.com/jneuff/idempotent-secrets/commit/a680d7edce8ce44e6dda0bb11a9fe04ede3c7699))
+* bump rust from `638747a` to `ad8c72c` ([#210](https://github.com/jneuff/idempotent-secrets/issues/210)) ([ae29cbf](https://github.com/jneuff/idempotent-secrets/commit/ae29cbfb616d85226a8a0d3b4e8285d248a12524))
+* bump rust from `ad8c72c` to `4a29b0d` ([#214](https://github.com/jneuff/idempotent-secrets/issues/214)) ([30663b3](https://github.com/jneuff/idempotent-secrets/commit/30663b324013cce3a886ea04575c82b80ec28404))
+* update image tag to sha-30663b324013cce3a886ea04575c82b80ec28404 ([#217](https://github.com/jneuff/idempotent-secrets/issues/217)) ([42b6cd9](https://github.com/jneuff/idempotent-secrets/commit/42b6cd93aab918399230a5b2214d8e0e29bc30ba))
+* update image tag to sha-a680d7edce8ce44e6dda0bb11a9fe04ede3c7699 ([#216](https://github.com/jneuff/idempotent-secrets/issues/216)) ([92af875](https://github.com/jneuff/idempotent-secrets/commit/92af875a72617b4ad5871208af023d5cb20f72f8))
+* update image tag to sha-ae29cbfb616d85226a8a0d3b4e8285d248a12524 ([#212](https://github.com/jneuff/idempotent-secrets/issues/212)) ([86e4a09](https://github.com/jneuff/idempotent-secrets/commit/86e4a09bda16bd30b1e13342d30790676bc08def))
+
 ## [0.5.6](https://github.com/jneuff/idempotent-secrets/compare/v0.5.5...v0.5.6) (2025-11-20)
 
 
