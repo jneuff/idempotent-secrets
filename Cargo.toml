@@ -16,7 +16,7 @@ kube = "2.0.1"
 rand = "0.8.5"
 rsa = "0.9.9"
 serde = "1.0.228"
-serde_json = "1.0.145"
+serde_json = "1.0.146"
 tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
