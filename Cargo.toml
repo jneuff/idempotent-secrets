@@ -13,7 +13,7 @@ base64 = "0.22.1"
 clap = { version = "4.5.53", features = ["derive"] }
 k8s-openapi = { version = "0.26.1", features = ["latest"] }
 kube = "2.0.1"
-rand = "0.8.5"
+rand = "0.9.2"
 rsa = "0.9.9"
 serde = "1.0.228"
 serde_json = "1.0.147"
